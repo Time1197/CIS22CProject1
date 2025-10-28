@@ -22,7 +22,7 @@ LinkedList<std::string> Tokenizer::processFile(const std::string& fileName) {
 		std::string word;
 
 		//split each line into an individual word
-		while (iss >> word) {
+		while (iss >> word) { //seperates words by whitespace
 			//normalize each word
 			std::string normalized = normalizeWord(word);
 			
