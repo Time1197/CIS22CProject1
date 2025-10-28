@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayStack.h" />
     <ClInclude Include="LinkedList.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
