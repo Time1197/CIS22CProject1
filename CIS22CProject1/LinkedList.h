@@ -199,7 +199,4 @@ public:
 		}
 		std::cout << "]" << std::endl;
 	}
-	//testing
-	//testing2
-	//testing3
 };
