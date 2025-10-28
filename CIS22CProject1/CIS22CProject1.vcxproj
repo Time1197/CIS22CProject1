@@ -22,6 +22,10 @@
     <ClInclude Include="ArrayStack.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="ListQueue.h" />
+    <ClInclude Include="Tokenizer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Tokenizer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
