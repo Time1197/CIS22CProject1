@@ -1,4 +1,4 @@
-#pragma onc#pragma once
+#pragma once
 
 #include <string>
 #include <fstream>      // For file handling (ifstream)

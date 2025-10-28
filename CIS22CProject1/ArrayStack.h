@@ -34,7 +34,7 @@ public:
 		if (isEmpty()) {
 			throw std::out_of_range("Cannot get top from empty stack");
 		}
-		return container.back;
+		return container.back();
 	}
 
 	//same as above, but for constant stacks
@@ -52,6 +52,6 @@ public:
 
 	//number of items in stack
 	int size() const {
-		return container.size();
+		return static_cast<int>(container.size());
 	}
 };
