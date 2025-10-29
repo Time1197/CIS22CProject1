@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayStack.h" />
+    <ClInclude Include="BSTMap.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="ListQueue.h" />
     <ClInclude Include="Searching.h" />
