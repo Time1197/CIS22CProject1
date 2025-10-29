@@ -10,6 +10,7 @@
 #include "ListQueue.h"
 #include "Tokenizer.h"
 #include "Sorting.h"
+#include "Searching.h" // <-- ADDED THIS
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -18,27 +19,26 @@ void testArrayStack();
 void testListQueue();
 void testTokenizer();
 void testSorting();
+void testSearching(); // <-- ADDED THIS
 
 // --- Main Function ---
 // This is the entry point of our program.
 int main() {
     // Run each of our test suites
-    // We wrap them in try/catch blocks in case our
-    // data structures throw exceptions (which they should!)
-
     try {
         testLinkedList();
         testArrayStack();
         testListQueue();
         testTokenizer();
         testSorting();
+        testSearching(); // <-- ADDED THIS
     }
     catch (const std::exception& e) {
         std::cout << "!!! TEST FAILED (UNCAUGHT EXCEPTION): " << e.what() << std::endl;
         return 1; // Exit with an error code
     }
 
-    std::cout << "\n--- All Phase 1 Tests Passed! ---" << std::endl;
+    std::cout << "\n--- All Phase 1 & 2 Tests Passed! ---" << std::endl; // <-- Updated message
 
     // Pause the console before closing (Visual Studio specific)
     std::cout << "\nPress Enter to exit...";
@@ -50,10 +50,8 @@ int main() {
 
 // --- Test Function Implementations ---
 
-/**
- * Runs all unit tests for the LinkedList class.
- */
 void testLinkedList() {
+    // ... (your existing testLinkedList function is perfect)
     std::cout << "--- Testing LinkedList<int> ---" << std::endl;
     LinkedList<int> list;
 
@@ -139,11 +137,8 @@ void testLinkedList() {
     std::cout << "--- LinkedList Tests Passed ---" << std::endl;
 }
 
-
-/**
- * Runs all unit tests for the ArrayStack class.
- */
 void testArrayStack() {
+    // ... (your existing testArrayStack function is perfect)
     std::cout << "\n--- Testing ArrayStack<std::string> ---" << std::endl;
     ArrayStack<std::string> stack;
 
@@ -189,11 +184,8 @@ void testArrayStack() {
     std::cout << "--- ArrayStack Tests Passed ---" << std::endl;
 }
 
-
-/**
- * Runs all unit tests for the ListQueue class.
- */
 void testListQueue() {
+    // ... (your existing testListQueue function is perfect)
     std::cout << "\n--- Testing ListQueue<int> ---" << std::endl;
     ListQueue<int> queue;
 
@@ -239,13 +231,8 @@ void testListQueue() {
     std::cout << "--- ListQueue Tests Passed ---" << std::endl;
 }
 
-
-/**
- * Runs all unit tests for the Tokenizer class.
- * This function *requires* the 'documents' folder to exist
- * in the same directory as the executable.
- */
 void testTokenizer() {
+    // ... (your existing testTokenizer function is perfect)
     std::cout << "\n--- Testing Tokenizer ---" << std::endl;
     Tokenizer tokenizer;
 
@@ -295,9 +282,9 @@ void testTokenizer() {
     std::cout << "--- Tokenizer Tests Passed ---" << std::endl;
 }
 
-// --- Helper function to print a vector ---
 template <typename T>
 void printVector(const std::vector<T>& vec, const std::string& title) {
+    // ... (your existing printVector function is perfect)
     std::cout << title << " (" << vec.size() << " items): [";
     for (size_t i = 0; i < vec.size(); ++i) {
         std::cout << vec[i];
@@ -308,8 +295,8 @@ void printVector(const std::vector<T>& vec, const std::string& title) {
     std::cout << "]" << std::endl;
 }
 
-// --- Helper function to check if a vector is sorted correctly ---
 bool isSorted(const std::vector<std::string>& vec, const std::vector<std::string>& expected) {
+    // ... (your existing isSorted function is perfect)
     if (vec.size() != expected.size()) {
         return false;
     }
@@ -321,11 +308,8 @@ bool isSorted(const std::vector<std::string>& vec, const std::vector<std::string
     return true;
 }
 
-
-/**
- * Runs all unit tests for the Sorting algorithms.
- */
 void testSorting() {
+    // ... (your existing testSorting function is perfect)
     std::cout << "\n--- Testing Sorting Algorithms ---" << std::endl;
 
     // Define our test cases
@@ -398,4 +382,68 @@ void testSorting() {
     std::cout << "--- Quick Sort Tests Passed ---" << std::endl;
 
     std::cout << "--- All Sorting Tests Passed ---" << std::endl;
+}
+
+// --- ADDED THIS ENTIRE FUNCTION ---
+/**
+ * Runs all unit tests for the Searching algorithms.
+ */
+void testSearching() {
+    std::cout << "\n--- Testing Searching Algorithms ---" << std::endl;
+
+    // --- Test 1: Linear Search (on unsorted data) ---
+    std::cout << "Testing Searching::linearSearch..." << std::endl;
+    std::vector<std::string> unsortedVec = { "c", "a", "b", "e", "d" };
+    printVector(unsortedVec, "  Test Vector (Unsorted):");
+
+    // Test 1a: Hit (item "b" is present)
+    if (!Searching::linearSearch(unsortedVec, std::string("b"))) {
+        throw std::runtime_error("Test FAILED (Linear Search): Did not find 'b'.");
+    }
+    std::cout << "  Test Passed: Found 'b'." << std::endl;
+
+    // Test 1b: Miss (item "z" is not present)
+    if (Searching::linearSearch(unsortedVec, std::string("z"))) {
+        throw std::runtime_error("Test FAILED (Linear Search): Found 'z', but it should be missing.");
+    }
+    std::cout << "  Test Passed: Did not find 'z'." << std::endl;
+
+
+    // --- Test 2: Binary Search (on SORTED data) ---
+    std::cout << "\nTesting Searching::binarySearch..." << std::endl;
+    // We MUST use a sorted vector for this.
+    std::vector<std::string> sortedVec = { "a", "b", "c", "d", "e" };
+    printVector(sortedVec, "  Test Vector (Sorted):");
+
+    // Test 2a: Hit (item "d" is present)
+    if (!Searching::binarySearch(sortedVec, std::string("d"))) {
+        throw std::runtime_error("Test FAILED (Binary Search): Did not find 'd'.");
+    }
+    std::cout << "  Test Passed: Found 'd'." << std::endl;
+
+    // Test 2b: Hit (first item "a" is present)
+    if (!Searching::binarySearch(sortedVec, std::string("a"))) {
+        throw std::runtime_error("Test FAILED (Binary Search): Did not find 'a' (first item).");
+    }
+    std::cout << "  Test Passed: Found 'a' (first item)." << std::endl;
+
+    // Test 2c: Hit (last item "e" is present)
+    if (!Searching::binarySearch(sortedVec, std::string("e"))) {
+        throw std::runtime_error("Test FAILED (Binary Search): Did not find 'e' (last item).");
+    }
+    std::cout << "  Test Passed: Found 'e' (last item)." << std::endl;
+
+    // Test 2d: Miss (item "z" is not present)
+    if (Searching::binarySearch(sortedVec, std::string("z"))) {
+        throw std::runtime_error("Test FAILED (Binary Search): Found 'z', but it should be missing.");
+    }
+    std::cout << "  Test Passed: Did not find 'z'." << std::endl;
+
+    // Test 2e: Miss (item "bb" is not present but is in range)
+    if (Searching::binarySearch(sortedVec, std::string("bb"))) {
+        throw std::runtime_error("Test FAILED (Binary Search): Found 'bb', but it should be missing.");
+    }
+    std::cout << "  Test Passed: Did not find 'bb'." << std::endl;
+
+    std::cout << "--- All Searching Tests Passed ---" << std::endl;
 }
