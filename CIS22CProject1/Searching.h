@@ -47,7 +47,7 @@ namespace Searching {
 			}
 
 			//if loop finishes and item was not found
-			return false;
 		}
+		return false;
 	}
 }
