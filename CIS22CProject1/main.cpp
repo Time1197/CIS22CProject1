@@ -2,12 +2,14 @@
 #include <string>       // For std::string
 #include <vector>       // For testing stack
 #include <stdexcept>    // For catching exceptions
+#include <chrono>       // For recording time
 
 // --- Our Project Headers ---
 #include "LinkedList.h"
 #include "ArrayStack.h"
 #include "ListQueue.h"
 #include "Tokenizer.h"
+#include "Sorting.h"
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -15,6 +17,7 @@ void testLinkedList();
 void testArrayStack();
 void testListQueue();
 void testTokenizer();
+void testSorting();
 
 // --- Main Function ---
 // This is the entry point of our program.
@@ -28,6 +31,7 @@ int main() {
         testArrayStack();
         testListQueue();
         testTokenizer();
+        testSorting();
     }
     catch (const std::exception& e) {
         std::cout << "!!! TEST FAILED (UNCAUGHT EXCEPTION): " << e.what() << std::endl;
@@ -289,4 +293,109 @@ void testTokenizer() {
     }
 
     std::cout << "--- Tokenizer Tests Passed ---" << std::endl;
+}
+
+// --- Helper function to print a vector ---
+template <typename T>
+void printVector(const std::vector<T>& vec, const std::string& title) {
+    std::cout << title << " (" << vec.size() << " items): [";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        std::cout << vec[i];
+        if (i < vec.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]" << std::endl;
+}
+
+// --- Helper function to check if a vector is sorted correctly ---
+bool isSorted(const std::vector<std::string>& vec, const std::vector<std::string>& expected) {
+    if (vec.size() != expected.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (vec[i] != expected[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+/**
+ * Runs all unit tests for the Sorting algorithms.
+ */
+void testSorting() {
+    std::cout << "\n--- Testing Sorting Algorithms ---" << std::endl;
+
+    // Define our test cases
+    std::vector<std::vector<std::string>> testInputs = {
+        {},                                 // Empty
+        {"a"},                              // Single element
+        {"a", "b", "c"},                    // Pre-sorted
+        {"c", "b", "a"},                    // Reverse-sorted
+        {"c", "a", "c", "b", "a"},          // Duplicates
+        {"foo", "bar", "baz", "apple", "zebra", "banana"} // Random
+    };
+
+    // Define the expected (correctly sorted) outputs
+    std::vector<std::vector<std::string>> expectedOutputs = {
+        {},
+        {"a"},
+        {"a", "b", "c"},
+        {"a", "b", "c"},
+        {"a", "a", "b", "c", "c"},
+        {"apple", "banana", "bar", "baz", "foo", "zebra"}
+    };
+
+    // --- Test Merge Sort ---
+    std::cout << "Testing Sorting::mergeSort..." << std::endl;
+    for (size_t i = 0; i < testInputs.size(); ++i) {
+        // Create a copy of the input to sort
+        std::vector<std::string> vecToSort = testInputs[i];
+
+        // --- Timing ---
+        auto start = std::chrono::high_resolution_clock::now();
+        Sorting::mergeSort(vecToSort); // Call the sort
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::micro> duration = end - start;
+
+        // --- Verification ---
+        if (!isSorted(vecToSort, expectedOutputs[i])) {
+            printVector(testInputs[i], "Test FAILED (Merge Sort) on input:");
+            printVector(vecToSort, "  Got:");
+            printVector(expectedOutputs[i], "  Expected:");
+            throw std::runtime_error("Merge Sort failed!");
+        }
+        printVector(vecToSort, "  Test Passed");
+        std::cout << "    (Took " << duration.count() << " microseconds)" << std::endl;
+    }
+    std::cout << "--- Merge Sort Tests Passed ---" << std::endl;
+
+
+    // --- Test Quick Sort ---
+    std::cout << "\nTesting Sorting::quickSort..." << std::endl;
+    for (size_t i = 0; i < testInputs.size(); ++i) {
+        // Create a copy of the input to sort
+        std::vector<std::string> vecToSort = testInputs[i];
+
+        // --- Timing ---
+        auto start = std::chrono::high_resolution_clock::now();
+        Sorting::quickSort(vecToSort); // Call the sort
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::micro> duration = end - start;
+
+        // --- Verification ---
+        if (!isSorted(vecToSort, expectedOutputs[i])) {
+            printVector(testInputs[i], "Test FAILED (Quick Sort) on input:");
+            printVector(vecToSort, "  Got:");
+            printVector(expectedOutputs[i], "  Expected:");
+            throw std::runtime_error("Quick Sort failed!");
+        }
+        printVector(vecToSort, "  Test Passed");
+        std::cout << "    (Took " << duration.count() << " microseconds)" << std::endl;
+    }
+    std::cout << "--- Quick Sort Tests Passed ---" << std::endl;
+
+    std::cout << "--- All Sorting Tests Passed ---" << std::endl;
 }
