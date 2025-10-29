@@ -19,15 +19,15 @@ namespace Sorting {
 		int n2 = right - mid;
 
 		//2. Create temporary vectors
-		std::vector<T> left(n1);
-		std::vector<T> right(n2);
+		std::vector<T> leftVec(n1);
+		std::vector<T> rightVec(n2);
 
 		//3. copy data to temporary vectors
 		for (int i = 0; i < n1; ++i) {
-			left[i] = vec[left + i];
+			leftVec[i] = vec[left + i];
 		}
 		for (int j = 0; j < n2; ++j) {
-			right[j] = vec[mid + 1 + j];
+			rightVec[j] = vec[mid + 1 + j];
 		}
 
 		//4. merge the temporary vectors back into vec[left...right]
@@ -40,14 +40,28 @@ namespace Sorting {
 		int k = left;
 
 		while (i < n1 && j < n2) {
-			if (left[i] <= right[j]) {
-				vec[k] = left[i];
-				i++
+			if (leftVec[i] <= rightVec[j]) {
+				vec[k] = leftVec[i];
+				i++;
 			}
 			else {
-				vec[k] = right[j];
+				vec[k] = rightVec[j];
 				j++;
 			}
+			k++;
+		}
+
+		//5. copying remaining elements of left[] if there are any
+		while (i < n1) {
+			vec[k] = leftVec[i];
+			i++;
+			k++;
+		}
+
+		//6. do the same for the right[]
+		while (j < n2) {
+			vec[k] = rightVec[j];
+			j++;
 			k++;
 		}
 	}
@@ -84,7 +98,7 @@ namespace Sorting {
 
 	//private partition codes
 	template <typename T>
-	int partition(std::vector<T>& vec, int low, int hight) {
+	int partition(std::vector<T>& vec, int low, int high) {
 		T pivot = vec[high];
 		int i = (low - 1);
 
@@ -106,11 +120,11 @@ namespace Sorting {
 		if (low < high) {
 			//partitioned index
 			int pie = partition(vec, low, high);
-		}
 
-		//seperately sort elements before partition and after partition
-		quickSortRecursive(vec, low, pie - 1);
-		quickSortRecursive(vec, pi + 1, high);
+			//seperately sort elements before partition and after partition
+			quickSortRecursive(vec, low, pie - 1);
+			quickSortRecursive(vec, pie + 1, high);
+		}
 	}
 
 	//public quick sort function
