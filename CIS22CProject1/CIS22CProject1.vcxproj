@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayStack.h" />
+    <ClInclude Include="AVLMap.h" />
     <ClInclude Include="BSTMap.h" />
     <ClInclude Include="HashMap.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="ListQueue.h" />
+    <ClInclude Include="RBMap.h" />
     <ClInclude Include="Searching.h" />
     <ClInclude Include="Sorting.h" />
     <ClInclude Include="Tokenizer.h" />

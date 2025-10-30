@@ -14,6 +14,9 @@
 #include "Searching.h"
 #include "BSTMap.h"
 #include "HashMap.h"
+#include "AVLMap.h"
+#include "RBMap.h"
+
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -25,6 +28,7 @@ void testSorting();
 void testSearching();
 void testBSTMap();
 void testHashMap();
+void testAVLMap();
 void testMapPerformance();
 
 // --- Main Function ---
@@ -32,24 +36,31 @@ void testMapPerformance();
 int main() {
     // Run each of our test suites
     try {
+        //phase 1
         testLinkedList();
         testArrayStack();
         testListQueue();
         testTokenizer();
+
+        //phase 2 tests
         testSorting();
         testSearching();
 
         // --- Phase 3 Tests ---
         testBSTMap();
         testHashMap();
+
+        //phase 4 tests
+        testAVLMap();
         testMapPerformance(); // Run the critical sorted-insert test
+
     }
     catch (const std::exception& e) {
         std::cout << "!!! TEST FAILED (UNCAUGHT EXCEPTION): " << e.what() << std::endl;
         return 1; // Exit with an error code
     }
 
-    std::cout << "\n--- All Phase 1, 2, & 3 Tests Passed! ---" << std::endl; // <-- Updated message
+    std::cout << "\n--- All Phase 1, 2, 3, & 4 (AVL) Tests Passed! ---" << std::endl; // <-- Updated message
 
     // Pause the console before closing (Visual Studio specific)
     std::cout << "\nPress Enter to exit...";
@@ -625,6 +636,89 @@ void testHashMap() {
     std::cout << "--- HashMap Tests Passed ---" << std::endl;
 }
 
+/**
+ * Runs all unit tests for the AVLMap.
+ */
+void testAVLMap() {
+    std::cout << "\n--- Testing AVLMap<std::string, int> ---" << std::endl;
+    AVLMap<std::string, int> map;
+    int val; // For retrieving search results
+
+    // Test 1: isEmpty and size on new map
+    if (!map.isEmpty() || map.size() != 0) {
+        throw std::runtime_error("Test 1 FAILED: New map not empty.");
+    }
+    std::cout << "Test 1 Passed: New map empty." << std::endl;
+
+    // Test 2: Insert New (triggers LL, LR, RR, RL rotations)
+    std::cout << "Testing insertions (LL, RR, LR, RL)..." << std::endl;
+    // --- LL Case ---
+    map.insert("c", 3);
+    map.insert("b", 2);
+    map.insert("a", 1); // Triggers LL rotation at "c"
+    std::cout << "After LL (a,b,c):";
+    map.print();
+    if (map.size() != 3 || !map.search("a", val) || !map.search("b", val) || !map.search("c", val)) {
+        throw std::runtime_error("Test 2 FAILED: LL rotation failed.");
+    }
+    std::cout << "Test 2a Passed: LL Rotation." << std::endl;
+
+    // --- RR Case ---
+    map.insert("d", 4);
+    map.insert("e", 5); // Triggers RR rotation at "c"
+    std::cout << "After RR (d,e):";
+    map.print();
+    if (map.size() != 5 || !map.search("d", val) || !map.search("e", val)) {
+        throw std::runtime_error("Test 2 FAILED: RR rotation failed.");
+    }
+    std::cout << "Test 2b Passed: RR Rotation." << std::endl;
+
+    // --- RL Case ---
+    map.insert("g", 7);
+    map.insert("f", 6); // Triggers RL rotation at "e"
+    std::cout << "After RL (g,f):";
+    map.print();
+    if (map.size() != 7 || !map.search("f", val) || !map.search("g", val)) {
+        throw std::runtime_error("Test 2 FAILED: RL rotation failed.");
+    }
+    std::cout << "Test 2c Passed: RL Rotation." << std::endl;
+
+    // --- LR Case ---
+    // Re-using "a" and "c" from before
+    map.insert("ab", 15); // "ab" is between "a" and "b". Triggers LR at "c"
+    std::cout << "After LR (ab):";
+    map.print();
+    if (map.size() != 8 || !map.search("ab", val)) {
+        throw std::runtime_error("Test 2 FAILED: LR rotation failed.");
+    }
+    std::cout << "Test 2d Passed: LR Rotation." << std::endl;
+
+
+    // Test 3: Search Hit
+    if (!map.search("c", val) || val != 3) {
+        throw std::runtime_error("Test 3 FAILED: Search hit failed for 'c'.");
+    }
+    std::cout << "Test 3 Passed: Search hit for 'c'." << std::endl;
+
+    // Test 4: Insert Update
+    map.insert("a", 99); // Update existing key
+    if (map.size() != 8) { // Size should not change
+        throw std::runtime_error("Test 4 FAILED: Insert update changed size.");
+    }
+    if (!map.search("a", val) || val != 99) {
+        throw std::runtime_error("Test 4 FAILED: Insert update failed to update value.");
+    }
+    std::cout << "Test 4 Passed: Insert update for 'a' to 99." << std::endl;
+
+    // Test 5: Search Miss
+    if (map.search("zucchini", val)) {
+        throw std::runtime_error("Test 5 FAILED: Search miss found 'zucchini'.");
+    }
+    std::cout << "Test 5 Passed: Search miss for 'zucchini'." << std::endl;
+
+    std::cout << "--- AVLMap Tests Passed ---" << std::endl;
+}
+
 // --- ADDED THIS ENTIRE FUNCTION ---
 /**
  * Runs the "Critical Performance Test" from the project spec.
@@ -683,8 +777,20 @@ void testMapPerformance() {
 
     std::cout << "  HashMap insertion time:    " << duration_hash.count() << " ms" << std::endl;
 
+    // --- Test 3: AVLMap (Balanced Case) ---
+    AVLMap<std::string, int> avlMap;
+
+    auto start_avl = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < words.size(); ++i) {
+        avlMap.insert(words[i], static_cast<int>(i));
+    }
+    auto end_avl = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration_avl = end_avl - start_avl;
+
+    std::cout << "  AVLMap insertion time:     " << duration_avl.count() << " ms" << std::endl;
+
     std::cout << "  Observation: BSTMap should be significantly slower (O(n^2))" << std::endl;
     std::cout << "  due to sorted input creating a degenerate tree (a linked list)." << std::endl;
-    std::cout << "  HashMap should be very fast (O(n))." << std::endl;
+    std::cout << "  HashMap and AVLMap should both be very fast (O(n log n) for AVL, O(n) for Hash)." << std::endl;
     std::cout << "--- Map Performance Test Complete ---" << std::endl;
 }

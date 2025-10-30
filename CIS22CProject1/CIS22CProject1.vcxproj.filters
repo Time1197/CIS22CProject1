@@ -39,6 +39,12 @@
     <ClInclude Include="HashMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AVLMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RBMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tokenizer.cpp">
