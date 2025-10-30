@@ -12,8 +12,8 @@
 #include "Tokenizer.h"
 #include "Sorting.h"
 #include "Searching.h"
-#include "BSTMap.h"     // <-- ADDED THIS
-#include "HashMap.h"    // <-- ADDED THIS
+#include "BSTMap.h"
+#include "HashMap.h"
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -23,9 +23,9 @@ void testListQueue();
 void testTokenizer();
 void testSorting();
 void testSearching();
-void testBSTMap();          // <-- ADDED THIS
-void testHashMap();         // <-- ADDED THIS
-void testMapPerformance();  // <-- ADDED THIS
+void testBSTMap();
+void testHashMap();
+void testMapPerformance();
 
 // --- Main Function ---
 // This is the entry point of our program.
