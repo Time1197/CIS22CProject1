@@ -37,7 +37,7 @@ LinkedList<std::string> Tokenizer::processFile(const std::string& fileName) {
 	return tokens;
 }
 
-//private normalizer helper method
+//public normalizer helper method
 
 std::string Tokenizer::normalizeWord(const std::string& word) {
 	std::string normalizedWord = "";

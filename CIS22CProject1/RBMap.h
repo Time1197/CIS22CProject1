@@ -286,9 +286,40 @@ public:
         }
     }
 
-private:
-    // Disable Copy Constructor and Assignment Operator
-    // (They are very complex to implement correctly for R-B trees)
-    RBMap(const RBMap& other) = delete;
-    RBMap& operator=(const RBMap& other) = delete;
+    // --- Copy Constructor ---
+    // (Replaces the '= delete' line)
+    RBMap(const RBMap<K, V>& other) {
+        // 1. Set up this map's new NIL node
+        NIL = new Node(K(), V());
+        NIL->color = BLACK;
+        NIL->left = NIL;
+        NIL->right = NIL;
+        NIL->parent = NIL;
+
+        // 2. Call the recursive copy function
+        root = copyRecursive(other.root, NIL); // Pass our NIL as parent of root
+
+        // 3. Copy the size
+        count = other.count;
+    }
+
+    // --- Copy Assignment Operator ---
+    // (Replaces the '= delete' line)
+    RBMap<K, V>& operator=(const RBMap<K, V>& other) {
+        if (this == &other) {
+            return *this; // Handle self-assignment
+        }
+
+        // 1. Clear this map's old data
+        clearRecursive(root);
+        // Note: We keep our existing NIL node
+
+        // 2. Call the recursive copy function
+        root = copyRecursive(other.root, NIL); // Pass our NIL as parent of root
+
+        // 3. Copy the size
+        count = other.count;
+
+        return *this;
+    }
 };

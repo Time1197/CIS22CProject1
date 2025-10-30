@@ -13,7 +13,6 @@ public:
      */
     LinkedList<std::string> processFile(const std::string& filename);
 
-private:
     /**
      * Helper function to normalize a single word.
      * - Converts to lowercase
