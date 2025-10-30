@@ -15,8 +15,7 @@
 #include "BSTMap.h"
 #include "HashMap.h"
 #include "AVLMap.h"
-#include "RBMap.h"
-
+#include "RBMap.h"      // <-- Includes RBMap
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -29,6 +28,7 @@ void testSearching();
 void testBSTMap();
 void testHashMap();
 void testAVLMap();
+void testRBMap();           // <-- Prototype for RBMap test
 void testMapPerformance();
 
 // --- Main Function ---
@@ -36,13 +36,10 @@ void testMapPerformance();
 int main() {
     // Run each of our test suites
     try {
-        //phase 1
         testLinkedList();
         testArrayStack();
         testListQueue();
         testTokenizer();
-
-        //phase 2 tests
         testSorting();
         testSearching();
 
@@ -50,17 +47,18 @@ int main() {
         testBSTMap();
         testHashMap();
 
-        //phase 4 tests
+        // --- Phase 4 Tests ---
         testAVLMap();
+        testRBMap();          // <-- Call to RBMap test
         testMapPerformance(); // Run the critical sorted-insert test
-
     }
     catch (const std::exception& e) {
         std::cout << "!!! TEST FAILED (UNCAUGHT EXCEPTION): " << e.what() << std::endl;
         return 1; // Exit with an error code
     }
 
-    std::cout << "\n--- All Phase 1, 2, 3, & 4 (AVL) Tests Passed! ---" << std::endl; // <-- Updated message
+    // <-- Updated success message -->
+    std::cout << "\n--- All Phase 1, 2, 3, & 4 Tests Passed! ---" << std::endl;
 
     // Pause the console before closing (Visual Studio specific)
     std::cout << "\nPress Enter to exit...";
@@ -160,7 +158,6 @@ void testLinkedList() {
 }
 
 void testArrayStack() {
-    // ... (your existing testArrayStack function is perfect)
     std::cout << "\n--- Testing ArrayStack<std::string> ---" << std::endl;
     ArrayStack<std::string> stack;
 
@@ -207,7 +204,6 @@ void testArrayStack() {
 }
 
 void testListQueue() {
-    // ... (your existing testListQueue function is perfect)
     std::cout << "\n--- Testing ListQueue<int> ---" << std::endl;
     ListQueue<int> queue;
 
@@ -254,7 +250,6 @@ void testListQueue() {
 }
 
 void testTokenizer() {
-    // ... (your existing testTokenizer function is perfect)
     std::cout << "\n--- Testing Tokenizer ---" << std::endl;
     Tokenizer tokenizer;
 
@@ -311,7 +306,6 @@ void testTokenizer() {
 
 template <typename T>
 void printVector(const std::vector<T>& vec, const std::string& title) {
-    // ... (your existing printVector function is perfect)
     std::cout << title << " (" << vec.size() << " items): [";
     for (size_t i = 0; i < vec.size(); ++i) {
         std::cout << vec[i];
@@ -323,7 +317,6 @@ void printVector(const std::vector<T>& vec, const std::string& title) {
 }
 
 bool isSorted(const std::vector<std::string>& vec, const std::vector<std::string>& expected) {
-    // ... (your existing isSorted function is perfect)
     if (vec.size() != expected.size()) {
         return false;
     }
@@ -336,7 +329,6 @@ bool isSorted(const std::vector<std::string>& vec, const std::vector<std::string
 }
 
 void testSorting() {
-    // ... (your existing testSorting function is perfect)
     std::cout << "\n--- Testing Sorting Algorithms ---" << std::endl;
 
     // Define our test cases
@@ -413,7 +405,6 @@ void testSorting() {
 
 
 void testSearching() {
-    // ... (your existing testSearching function is perfect)
     std::cout << "\n--- Testing Searching Algorithms ---" << std::endl;
 
     // --- Test 1: Linear Search (on unsorted data) ---
@@ -473,7 +464,6 @@ void testSearching() {
     std::cout << "--- All Searching Tests Passed ---" << std::endl;
 }
 
-// --- ADDED THIS ENTIRE FUNCTION ---
 /**
  * Runs all unit tests for the BSTMap.
  */
@@ -552,7 +542,6 @@ void testBSTMap() {
     std::cout << "--- BSTMap Tests Passed ---" << std::endl;
 }
 
-// --- ADDED THIS ENTIRE FUNCTION ---
 /**
  * Runs all unit tests for the HashMap.
  */
@@ -719,11 +708,87 @@ void testAVLMap() {
     std::cout << "--- AVLMap Tests Passed ---" << std::endl;
 }
 
-// --- ADDED THIS ENTIRE FUNCTION ---
+/**
+ * Runs all unit tests for the RBMap.
+ */
+void testRBMap() {
+    std::cout << "\n--- Testing RBMap<std::string, int> ---" << std::endl;
+    RBMap<std::string, int> map;
+    int val;
+
+    // Test 1: isEmpty and size
+    if (!map.isEmpty() || map.size() != 0) {
+        throw std::runtime_error("Test 1 FAILED: New map not empty.");
+    }
+    std::cout << "Test 1 Passed: New map empty." << std::endl;
+
+    // Test 2: Insert (Case 1: Uncle RED)
+    // Inserting 10, 20, 30. 
+    // 10 becomes root (BLACK). 
+    // 20 is child of 10 (RED).
+    // 30 is child of 20 (RED). -> Parent(20) is RED.
+    // Grandparent(10) is BLACK. Uncle is NIL (BLACK).
+    // This triggers Case 3 (line). LeftRotate(10).
+    // Root becomes 20 (BLACK), 10 and 30 are children (RED).
+    map.insert("b", 20); // Root, becomes BLACK
+    map.insert("a", 10); // Left child, RED
+    map.insert("c", 30); // Right child, RED. Parent is BLACK, so OK.
+    if (map.size() != 3) throw std::runtime_error("Test 2 FAILED: Initial setup size.");
+    std::cout << "  Setup (a,b,c):";
+    map.print();
+
+    // Now, insert "d" (child of "c"). Parent "c" is RED.
+    // Grandparent "b" is BLACK. Uncle "a" is RED.
+    // This is the classic "Case 1: Uncle is RED"
+    // "a" and "c" become BLACK. "b" becomes RED (but is root, so flips to BLACK).
+    map.insert("d", 40);
+    if (map.size() != 4) throw std::runtime_error("Test 2 FAILED: Uncle RED case size.");
+    std::cout << "  After Uncle RED case (d):";
+    map.print();
+    std::cout << "Test 2 Passed: Insert (Uncle RED)." << std::endl;
+
+    // Test 3: Insert (Case 2/3: Uncle BLACK)
+    // Now insert "e" (child of "d"). Parent "d" is RED.
+    // Grandparent "c" is BLACK. Uncle is NIL (BLACK).
+    // This is "Case 3: Line" (right-right).
+    // LeftRotate at "c". Recolor.
+    map.insert("e", 50);
+    if (map.size() != 5) throw std::runtime_error("Test 3 FAILED: Uncle BLACK case size.");
+    std::cout << "  After Uncle BLACK case (e):";
+    map.print();
+    std::cout << "Test 3 Passed: Insert (Uncle BLACK, Line)." << std::endl;
+
+
+    // Test 4: Search Hit
+    if (!map.search("c", val) || val != 30) {
+        throw std::runtime_error("Test 4 FAILED: Search hit failed for 'c'.");
+    }
+    std::cout << "Test 4 Passed: Search hit for 'c'." << std::endl;
+
+    // Test 5: Insert Update
+    map.insert("a", 99); // Update
+    if (map.size() != 5) {
+        throw std::runtime_error("Test 5 FAILED: Insert update changed size.");
+    }
+    if (!map.search("a", val) || val != 99) {
+        throw std::runtime_error("Test 5 FAILED: Insert update failed to update value.");
+    }
+    std::cout << "Test 5 Passed: Insert update for 'a' to 99." << std::endl;
+
+    // Test 6: Search Miss
+    if (map.search("zucchini", val)) {
+        throw std::runtime_error("Test 6 FAILED: Search miss found 'zucchini'.");
+    }
+    std::cout << "Test 6 Passed: Search miss for 'zucchini'." << std::endl;
+
+    std::cout << "--- RBMap Tests Passed ---" << std::endl;
+}
+
+
 /**
  * Runs the "Critical Performance Test" from the project spec.
  * Reads words from 'long_sorted.txt' and times insertion into
- * BSTMap and HashMap.
+ * BSTMap, HashMap, AVLMap, and RBMap.
  */
 void testMapPerformance() {
     std::cout << "\n--- Testing Map Performance (Sorted Input) ---" << std::endl;
@@ -789,8 +854,23 @@ void testMapPerformance() {
 
     std::cout << "  AVLMap insertion time:     " << duration_avl.count() << " ms" << std::endl;
 
+
+    // --- Test 4: RBMap (Balanced Case) ---
+    RBMap<std::string, int> rbMap;
+
+    auto start_rb = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < words.size(); ++i) {
+        rbMap.insert(words[i], static_cast<int>(i));
+    }
+    auto end_rb = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration_rb = end_rb - start_rb;
+
+    std::cout << "  RBMap insertion time:      " << duration_rb.count() << " ms" << std::endl;
+
+
     std::cout << "  Observation: BSTMap should be significantly slower (O(n^2))" << std::endl;
     std::cout << "  due to sorted input creating a degenerate tree (a linked list)." << std::endl;
-    std::cout << "  HashMap and AVLMap should both be very fast (O(n log n) for AVL, O(n) for Hash)." << std::endl;
+    std::cout << "  HashMap, AVLMap, and RBMap should all be very fast." << std::endl;
+    std::cout << "  (O(n log n) for trees, O(n) for Hash)." << std::endl;
     std::cout << "--- Map Performance Test Complete ---" << std::endl;
 }

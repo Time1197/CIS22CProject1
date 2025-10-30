@@ -20,6 +20,7 @@ private:
 
     Node* root;
     Node* NIL; // A single "sentinel" node to represent all leaves
+    int count;
 
     // --- Core Helper Functions ---
 
@@ -181,7 +182,8 @@ private:
         printInOrder(node->left);
         std::cout << " (" << node->key << ": " << node->value
             << ", " << (node->color == RED ? "R" : "B")
-            << ", p=" << (node->parent == NIL ? "NIL" : std::to_string(node->parent->key)) << ")\n";
+            // --- FIX: Removed std::to_string ---
+            << ", p=" << (node->parent == NIL ? "NIL" : node->parent->key) << ")\n";
         printInOrder(node->right);
     }
 
