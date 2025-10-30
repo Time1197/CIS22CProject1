@@ -37,7 +37,7 @@ private:
 
 		//recursive steps
 		if (key < node->key) {
-			//if key is larger, go left
+			//if key is larger, go lefts
 			node->left = insertRecursive(node->left, key, value);
 		}
 		else if (key > node->key) {
@@ -176,7 +176,7 @@ public:
 	void print() const {
 		std::cout << "BSTMap (" << size() << " items):\n";
 		if (isEmpty()) {
-			std::cout << " (empty)\n"
+			std::cout << " (empty)\n";
 		}
 		printInOrder(root);
 	}
