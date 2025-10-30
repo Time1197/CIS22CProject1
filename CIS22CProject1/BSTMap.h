@@ -60,7 +60,7 @@ private:
 	* outValue, A reference to store the found value
 	* returns true if a key was found, false otherwise
 	*/
-	bool searchRecursive(Node* node, const K&, V& outValue) const {
+	bool searchRecursive(Node* node, const K& key, V& outValue) const {
 		if (node == nullptr) {
 			return false; //base case: key not found
 		}
@@ -74,7 +74,7 @@ private:
 			return searchRecursive(node->left, key, outValue); //search left
 		}
 		else {
-			return searchRecursive(node->right, key, outValue) //search right
+			return searchRecursive(node->right, key, outValue); //search right
 		}
 	}
 
@@ -92,7 +92,7 @@ private:
 	//copy self, then copy children
 	//returns a pointer to the new copied node
 	Node* copyRecursive(Node* node) {
-		if node(node == nullptr) {
+		if (node == nullptr) {
 			return nullptr;
 		}
 

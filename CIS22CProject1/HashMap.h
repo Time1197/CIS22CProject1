@@ -68,18 +68,18 @@ private:
 
 	//private clear helper
 	//deletes all nodes in all buckets
-	void clearAllNodes() {
-		for (int i = 0; i < capacity; ++i) {
-			Node* current = buckets[i];
-			while (current != nullptr) {
-				Node* temp = current;
-				current = current->next;
-				delete temp;
-			}
-			buckets[i] = nullptr
+void clearAllNodes() {
+	for (int i = 0; i < capacity; ++i) {
+		Node* current = buckets[i];
+		while (current != nullptr) {
+			Node* temp = current;
+			current = current->next;
+			delete temp;
 		}
-		count = 0;
+		buckets[i] = nullptr
 	}
+	count = 0;
+}
 
 public:
 	//constructor
@@ -134,7 +134,7 @@ public:
 
 		//clear existing data
 		clearAllNodes();
-		
+
 		//copy data from other
 		capacity = other.capacity;
 		count = other.count;
@@ -159,6 +159,127 @@ public:
 		}
 
 		return *this;
+	}
+
+	//public interface
+
+	//inserts a key value pair
+	void insert(const K& key, const V& value) {
+		//1. check load factor, rehash is necessary
+		if (static_cast<double>)(count + 1) / capacity > MAX_LOAD_FACTOR) {
+			rehash()
+		}
+
+		//2. find the bucket
+		int index = hash(key);
+		Node* current = buckets[index];
+
+		//3. search for the key in this bucket's list
+		while (current != nullptr) {
+			if (current->key == key) {
+				//key found: update value and return
+				current->value = value;
+				return;
+			}
+			current = current->next;
+		}
+
+		//4. key not found: cleate a new node and add it to the FRONT
+		Node* newNode = new Node(key, value);
+		newNode->next = buckets[index];
+		buckets[index] = newNode;
+		count++;
+	}
+
+	//searches for a key and returns its value via out-parameter
+	//returns true if found, false otherwise
+
+	bool search(const K& key, V& outValue) const {
+		int index = hash(key);
+		Node* current = buckets[index];
+
+		//traverse the list at this bucket
+		while (current != nullptr) {
+			if (current->key == key) {
+				//key found
+				outValue = current->value;
+				return true;
+			}
+			current = current->next;
+		}
+
+		//key not found
+		return false;
+	}
+
+	/**
+	 * Removes a key-value pair from the map.
+	 * Returns true if the key was found and removed, false otherwise.
+	 */
+	bool remove(const K& key) {
+		int index = hash(key);
+		Node* current = buckets[index];
+		Node* prev = nullptr; //keep track of the previous node
+
+		//traverse the list
+		while (current != nullptr) {
+			if (current->key == key) {
+				//key found, now remove it
+				if (prev == nullptr) {
+					//case 1: The node to remove is the head of the list
+					buckets[index] = current->next;
+				}
+				else {
+					//case 2: The node is in the middle or at the end
+					prev->next = current->next;
+				}
+
+				delete current;
+				count--;
+				return true;
+			}
+			//move to the next node
+			prev = current;
+			current = current->next;
+		}
+
+		//key not found
+		return false;
+	}
+
+	//getters
+
+	int size() const {
+		return count;
+	}
+
+	bool isEmpty() const {
+		return count == 0;
+	}
+
+	//debugging
+	//prints the contents of the hashmap
+
+	void print() const {
+		std::cout << "HashMap (" << count << " items, " << capacity << " capacity):\n";
+		for (int i = 0; i < capacity; ++i) {
+			std::cout << "  Bucket " << i << ": ";
+			Node* current = buckets[i];
+			if (current == nullptr) {
+				std::cout << "(empty)\n";
+			}
+			else {
+				std::cout << "[";
+				while (current != nullptr) {
+					std::cout << " (" << current->key << ": " << current->value << ") ";
+					if (current->next != nullptr) {
+						std::cout << "->";
+					}
+					current = current->next;
+				}
+				std::cout << "]\n";
+			}
+		}
 	}
 
 };

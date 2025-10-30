@@ -3,6 +3,7 @@
 #include <vector>       // For testing stack
 #include <stdexcept>    // For catching exceptions
 #include <chrono>       // For recording time
+#include <fstream>      // For file I/O in performance test
 
 // --- Our Project Headers ---
 #include "LinkedList.h"
@@ -10,7 +11,9 @@
 #include "ListQueue.h"
 #include "Tokenizer.h"
 #include "Sorting.h"
-#include "Searching.h" // <-- ADDED THIS
+#include "Searching.h"
+#include "BSTMap.h"      // <-- ADDED THIS
+#include "HashMap.h"     // <-- ADDED THIS
 
 // --- Test Function Prototypes ---
 // We'll write these functions below main()
@@ -19,7 +22,10 @@ void testArrayStack();
 void testListQueue();
 void testTokenizer();
 void testSorting();
-void testSearching(); // <-- ADDED THIS
+void testSearching();
+void testBSTMap();          // <-- ADDED THIS
+void testHashMap();         // <-- ADDED THIS
+void testMapPerformance();  // <-- ADDED THIS
 
 // --- Main Function ---
 // This is the entry point of our program.
@@ -31,14 +37,18 @@ int main() {
         testListQueue();
         testTokenizer();
         testSorting();
-        testSearching(); // <-- ADDED THIS
+        testSearching();
+        testBSTMap();       // <-- ADDED THIS
+        testHashMap();      // <-- ADDED THIS
+        testMapPerformance(); // <-- ADDED THIS
     }
     catch (const std::exception& e) {
         std::cout << "!!! TEST FAILED (UNCAUGHT EXCEPTION): " << e.what() << std::endl;
         return 1; // Exit with an error code
     }
 
-    std::cout << "\n--- All Phase 1 & 2 Tests Passed! ---" << std::endl; // <-- Updated message
+    // <-- Updated message -->
+    std::cout << "\n--- All Phase 1, 2, & 3 Tests Passed! ---" << std::endl;
 
     // Pause the console before closing (Visual Studio specific)
     std::cout << "\nPress Enter to exit...";
@@ -241,12 +251,19 @@ void testTokenizer() {
         if (list.size() != expected.size()) {
             throw std::runtime_error("Test FAILED: " + testName + " - size mismatch.");
         }
+
+        // This check is slightly modified to work with your list
+        // A full check would iterate the list, but 'find' is sufficient
+        // to pass the project's tokenizer tests.
+        LinkedList<std::string> tempList = list; // Use copy
         for (const auto& word : expected) {
-            if (!list.find(word)) {
-                throw std::runtime_error("Test FAILED: " + testName + " - missing word: " + word);
+            if (!tempList.deleteNode(word)) { // Find and "consume" the word
+                list.print();
+                throw std::runtime_error("Test FAILED: " + testName + " - word mismatch or duplicate issue for: " + word);
             }
         }
-        std::cout << "Test Passed: " << testName << " - Output: ";
+
+        std::cout << "Test Passed: " + testName + " - Output: ";
         list.print();
         };
 
@@ -384,11 +401,9 @@ void testSorting() {
     std::cout << "--- All Sorting Tests Passed ---" << std::endl;
 }
 
-// --- ADDED THIS ENTIRE FUNCTION ---
-/**
- * Runs all unit tests for the Searching algorithms.
- */
+
 void testSearching() {
+    // ... (your existing testSearching function is perfect)
     std::cout << "\n--- Testing Searching Algorithms ---" << std::endl;
 
     // --- Test 1: Linear Search (on unsorted data) ---
@@ -446,4 +461,232 @@ void testSearching() {
     std::cout << "  Test Passed: Did not find 'bb'." << std::endl;
 
     std::cout << "--- All Searching Tests Passed ---" << std::endl;
+}
+
+// --- NEW TEST FUNCTION ---
+void testBSTMap() {
+    std::cout << "\n--- Testing BSTMap<std::string, int> ---" << std::endl;
+    BSTMap<std::string, int> map;
+    int val = 0;
+
+    // Test 1: isEmpty and size
+    if (!map.isEmpty() || map.size() != 0) {
+        throw std::runtime_error("Test 1 FAILED: New map not empty.");
+    }
+    std::cout << "Test 1 Passed: New map empty." << std::endl;
+
+    // Test 2: Insert New
+    map.insert("banana", 10);
+    map.insert("apple", 20);
+    map.insert("carrot", 30);
+    if (map.size() != 3) {
+        throw std::runtime_error("Test 2 FAILED: Insert failed (size mismatch).");
+    }
+    std::cout << "Test 2 Passed: insert() new items and size()." << std::endl;
+
+    // Test 3: Search Hit
+    if (!map.search("apple", val) || val != 20) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'apple' failed.");
+    }
+    if (!map.search("banana", val) || val != 10) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'banana' failed.");
+    }
+    if (!map.search("carrot", val) || val != 30) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'carrot' failed.");
+    }
+    std::cout << "Test 3 Passed: search() hit." << std::endl;
+
+    // Test 4: Search Miss
+    if (map.search("grape", val)) {
+        throw std::runtime_error("Test 4 FAILED: search() found 'grape' (miss test).");
+    }
+    std::cout << "Test 4 Passed: search() miss." << std::endl;
+
+    // Test 5: Insert Update
+    map.insert("apple", 99); // Update existing key
+    if (map.size() != 3) { // Size should not change
+        throw std::runtime_error("Test 5 FAILED: Insert update changed size.");
+    }
+    if (!map.search("apple", val) || val != 99) {
+        throw std::runtime_error("Test 5 FAILED: Insert update failed to change value.");
+    }
+    std::cout << "Test 5 Passed: insert() update." << std::endl;
+    map.print();
+
+    // Test 6: Copy Constructor
+    BSTMap<std::string, int> map2 = map;
+    map.insert("date", 40); // Modify original
+    if (map2.size() != 3) { // Copy should be unchanged
+        throw std::runtime_error("Test 6 FAILED: Copy constructor (size).");
+    }
+    if (map2.search("date", val)) {
+        throw std::runtime_error("Test 6 FAILED: Copy constructor (not a deep copy).");
+    }
+    std::cout << "Test 6 Passed: Copy constructor." << std::endl;
+
+    std::cout << "--- BSTMap Tests Passed ---" << std::endl;
+}
+
+// --- NEW TEST FUNCTION ---
+void testHashMap() {
+    std::cout << "\n--- Testing HashMap<std::string, int> ---" << std::endl;
+    HashMap<std::string, int> map;
+    int val = 0;
+
+    // Test 1: isEmpty and size
+    if (!map.isEmpty() || map.size() != 0) {
+        throw std::runtime_error("Test 1 FAILED: New map not empty.");
+    }
+    std::cout << "Test 1 Passed: New map empty." << std::endl;
+
+    // Test 2: Insert New
+    map.insert("banana", 10);
+    map.insert("apple", 20);
+    map.insert("carrot", 30);
+    if (map.size() != 3) {
+        throw std::runtime_error("Test 2 FAILED: Insert failed (size mismatch).");
+    }
+    std::cout << "Test 2 Passed: insert() new items and size()." << std::endl;
+
+    // Test 3: Search Hit
+    if (!map.search("apple", val) || val != 20) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'apple' failed.");
+    }
+    if (!map.search("banana", val) || val != 10) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'banana' failed.");
+    }
+    if (!map.search("carrot", val) || val != 30) {
+        throw std::runtime_error("Test 3 FAILED: search() for 'carrot' failed.");
+    }
+    std::cout << "Test 3 Passed: search() hit." << std::endl;
+
+    // Test 4: Search Miss
+    if (map.search("grape", val)) {
+        throw std::runtime_error("Test 4 FAILED: search() found 'grape' (miss test).");
+    }
+    std::cout << "Test 4 Passed: search() miss." << std::endl;
+
+    // Test 5: Insert Update
+    map.insert("apple", 99); // Update existing key
+    if (map.size() != 3) { // Size should not change
+        throw std::runtime_error("Test 5 FAILED: Insert update changed size.");
+    }
+    if (!map.search("apple", val) || val != 99) {
+        throw std::runtime_error("Test 5 FAILED: Insert update failed to change value.");
+    }
+    std::cout << "Test 5 Passed: insert() update." << std::endl;
+
+    // Test 6: Remove
+    if (!map.remove("banana")) { // Remove an existing item
+        throw std::runtime_error("Test 6 FAILED: remove() returned false for existing item.");
+    }
+    if (map.size() != 2) {
+        throw std::runtime_error("Test 6 FAILED: remove() did not update size.");
+    }
+    if (map.search("banana", val)) {
+        throw std::runtime_error("Test 6 FAILED: remove() did not remove item.");
+    }
+    std::cout << "Test 6 Passed: remove() item." << std::endl;
+
+    // Test 7: Remove Miss
+    if (map.remove("zebra")) { // Remove non-existent item
+        throw std::runtime_error("Test 7 FAILED: remove() returned true for missing item.");
+    }
+    std::cout << "Test 7 Passed: remove() miss." << std::endl;
+
+    // Test 8: Rehash test
+    std::cout << "Testing rehash..." << std::endl;
+    HashMap<int, int> rehash_map(5); // Start with small capacity (5)
+    // MAX_LOAD_FACTOR = 0.75. Rehash triggered when size > 5 * 0.75 = 3.75 (i.e., at 4th item)
+    rehash_map.insert(1, 1); // size 1
+    rehash_map.insert(2, 2); // size 2
+    rehash_map.insert(3, 3); // size 3
+    rehash_map.insert(4, 4); // size 4, should trigger rehash to capacity 10
+    rehash_map.insert(5, 5); // size 5
+    rehash_map.insert(6, 6); // size 6
+    rehash_map.insert(7, 7); // size 7
+    rehash_map.insert(8, 8); // size 8, should trigger rehash to capacity 20
+
+    if (rehash_map.size() != 8) {
+        throw std::runtime_error("Test 8 FAILED: Rehash test size is incorrect.");
+    }
+    // Verify all items are still present after rehashing
+    for (int i = 1; i <= 8; ++i) {
+        if (!rehash_map.search(i, val) || val != i) {
+            rehash_map.print();
+            throw std::runtime_error("Test 8 FAILED: Failed to find item " + std::to_string(i) + " after rehash.");
+        }
+    }
+    std::cout << "Test 8 Passed: Rehash." << std::endl;
+    rehash_map.print();
+
+
+    std::cout << "--- HashMap Tests Passed ---" << std::endl;
+}
+
+// --- NEW TEST FUNCTION ---
+/**
+ * Runs the "Critical Performance Test" from the project spec.
+ * Loads a sorted file and inserts into BST vs HashMap.
+ */
+void testMapPerformance() {
+    std::cout << "\n--- Testing Map Performance (BST vs HashMap) ---" << std::endl;
+
+    std::string filename = "documents/long_sorted.txt";
+    std::vector<std::string> words;
+
+    // 1. Read the file
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cout << "  WARNING: Could not open '" << filename << "'." << std::endl;
+        std::cout << "  SKIPPING performance test. Create this file as per the project spec to run this test." << std::endl;
+        return;
+    }
+
+    std::string word;
+    while (file >> word) {
+        words.push_back(word);
+    }
+    file.close();
+
+    if (words.empty()) {
+        std::cout << "  WARNING: '" << filename << "' is empty." << std::endl;
+        std::cout << "  SKIPPING performance test." << std::endl;
+        return;
+    }
+
+    std::cout << "  Loaded " << words.size() << " words from " << filename << ". Starting tests..." << std::endl;
+
+    // 2. Test BSTMap (Worst Case: O(n^2))
+    auto start_bst = std::chrono::high_resolution_clock::now();
+
+    BSTMap<std::string, int> bst;
+    for (const auto& w : words) {
+        bst.insert(w, 1);
+    }
+
+    auto end_bst = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration_bst = end_bst - start_bst;
+    std::cout << "  BSTMap Insert Time: " << duration_bst.count() << " ms" << std::endl;
+
+    // 3. Test HashMap (Average Case: O(n))
+    auto start_hash = std::chrono::high_resolution_clock::now();
+
+    HashMap<std::string, int> hmap;
+    for (const auto& w : words) {
+        hmap.insert(w, 1);
+    }
+
+    auto end_hash = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration_hash = end_hash - start_hash;
+    std::cout << "  HashMap Insert Time: " << duration_hash.count() << " ms" << std::endl;
+
+    // 4. Analysis
+    std::cout << "  --- Analysis ---" << std::endl;
+    std::cout << "  Inserting sorted data into a basic BST is the *worst-case* (O(n^2))" << std::endl;
+    std::cout << "  because the tree degenerates into a linked list." << std::endl;
+    std::cout << "  HashMap insertion remains fast (O(n) total) because" << std::endl;
+    std::cout << "  the hash function distributes keys, regardless of order." << std::endl;
+    std::cout << "  This is why balanced trees (Phase 4) are necessary!" << std::endl;
+    std::cout << "--- Map Performance Test Passed ---" << std::endl;
 }
