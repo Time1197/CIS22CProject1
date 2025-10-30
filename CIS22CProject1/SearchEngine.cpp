@@ -259,7 +259,7 @@ void SearchEngine::printDocumentContents(const std::string& docID) const {
 	fullPath /= docID;
 
 	std::ifstream file(fullPath);
-	if (file.is_open()) {
+	if (!file.is_open()) {
 		std::cout << "\n --- ERROR: could not open " << fullPath.string() << " ---" << std::endl;
 		return;
 	}
