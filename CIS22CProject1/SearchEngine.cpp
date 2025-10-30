@@ -1,16 +1,24 @@
 #include "SearchEngine.h"
 
+// constructor
+SearchEngine::SearchEngine(const std::string& directoryPath) {
+	//store path to read files
+	docDirectory = directoryPath;
+	//initalize current Document to empty
+	currentDocument = "";
+}
+
 //indexing
 
-void SearchEngine::buildIndexFromDirectory(const std::string& directoryPath) {
+void SearchEngine::buildIndexFromDirectory() {
 	//clear any old data
 	invertedIndex = HashMap<std::string, RBMap<std::string, int>>();
 	indexedDocuments = LinkedList<std::string>();
 
-	std::cout << "Starting to index directory: " << directoryPath << std::endl;
+	std::cout << "Starting to index directory: " << docDirectory << std::endl;
 
 	//C++ 17 filesystem iterator
-	for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
+	for (const auto& entry : std::filesystem::directory_iterator(docDirectory)) {
 		std::string filepath = entry.path().string();
 		std::string filename = entry.path().filename().string();
 
@@ -126,6 +134,14 @@ LinkedList<std::string> SearchEngine::query(const std::string& queryString) {
 			termsVec.push_back(tempQueryTerms.removeFromHead());
 		}
 
+		// Create a vector of all document IDs
+		LinkedList<std::string> docCopy = indexedDocuments; // Copy
+		std::vector<std::string> docVec;
+		while (!docCopy.isEmpty()) {
+			docVec.push_back(docCopy.removeFromHead());
+		}
+
+
 		for (const std::string& term : termsVec) {
 			RBMap<std::string, int> postings;
 			// a) Check if word is in the main index
@@ -159,30 +175,43 @@ LinkedList<std::string> SearchEngine::query(const std::string& queryString) {
 //views a document, which updates the nagivation history
 
 void SearchEngine::viewDocument(const std::string& docID) {
-	if (docID.empty() || docID == currentDocument) {
+	if (docID.empty()) {
 		return; //no changes
 	}
 
-	//1. push old current document onto back stack
+	//1. check if doc exists before viewing
+	if (!indexedDocuments.find(docID)) {
+		std::cout << "Error: Document" << docID << " not found in index." << std::endl;
+		return;
+	}
+
+	if (docID == currentDocument) {
+		std::cout << " (Already viewing " << docID << ")" << std::endl;
+		printDocumentContents(docID); //reprint contents
+		return;
+	}
+
+	//2. push old current document onto the backstack
 	if (!currentDocument.empty()) {
 		historyBack.push(currentDocument);
 	}
 
-	//2. set the new current document
+	//3. set the new current document
 	currentDocument = docID;
 
-	//3. clear the forward history
+	//4. clear the forward history
 	//create and empty stack
 	historyForward = ArrayStack<std::string>();
 
-	std::cout << " Viewing document: " << currentDocument << std::endl;
+	//5. print contents
+	printDocumentContents(currentDocument);
 }
 
 //moves to the previous document in history
-std::string SearchEngine::goBack() {
+void SearchEngine::goBack() {
 	if (historyBack.isEmpty()) {
 		std::cout << "  (No back history)" << std::endl;
-		return ""; //nothing to go back to
+		return; //nothing to go back to
 	}
 
 	//1. push the current document onto the forwards stack
@@ -194,16 +223,15 @@ std::string SearchEngine::goBack() {
 	currentDocument = historyBack.top();
 	historyBack.pop();
 
-	std::cout << " Viewing document: " << currentDocument << std::endl;
-	return currentDocument;
+	printDocumentContents(currentDocument);
 }
 
 //moves to next document in history
 
-std::string SearchEngine::goForward() {
+void SearchEngine::goForward() {
 	if (historyForward.isEmpty()) {
 		std::cout << "  (No forward history)" << std::endl;
-		return ""; //nothing to go back to
+		return;
 	}
 
 	//1. push current document to back stack
@@ -215,10 +243,32 @@ std::string SearchEngine::goForward() {
 	currentDocument = historyForward.top();
 	historyForward.pop();
 
-	std::cout << " Viewing document: " << currentDocument << std::endl;
-	return currentDocument;
+	//3. print the document's contents
+	printDocumentContents(currentDocument);
 }
 
 std::string SearchEngine::getCurrentDocument() const {
 	return currentDocument;
+}
+
+//print document contents
+void SearchEngine::printDocumentContents(const std::string& docID) const {
+	//construct full path
+	//use filesystem::path to correctly join paths
+	std::filesystem::path fullPath = docDirectory;
+	fullPath /= docID;
+
+	std::ifstream file(fullPath);
+	if (file.is_open()) {
+		std::cout << "\n --- ERROR: could not open " << fullPath.string() << " ---" << std::endl;
+		return;
+	}
+
+	std::cout << "\n--- Viewing: " << docID << " ---" << std::endl;
+	std::string line;
+	while (std::getline(file, line)) {
+		std::cout << line << std::endl;
+	}
+	std::cout << "--- End of: " << docID << " ---" << std::endl; // Use std::endl
+	file.close();
 }

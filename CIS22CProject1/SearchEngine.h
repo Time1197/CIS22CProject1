@@ -33,11 +33,20 @@ private:
 	ArrayStack<std::string> historyForward;
 	std::string currentDocument;
 
+	//stores path to documents folder
+	std::string docDirectory;
+
+	//private helper to open and print the contents of a file
+	void printDocumentContents(const std::string& docID) const;
+
 public:
+	//constructor
+	SearchEngine(const std::string& directoryPath);
+	
 	//indexing
 
 	//iterates thru all text files in a given direcotry path and builds inverted index
-	void buildIndexFromDirectory(const std::string& directoryPath);
+	void buildIndexFromDirectory();
 
 	//prints the contetns of inverted index (debugging)
 	void printIndex() const;
@@ -54,10 +63,10 @@ public:
 	void viewDocument(const std::string& docID);
 
 	//moves back in history to previous document
-	std::string goBack();
+	void goBack();
 
 	//moves forwards in history
-	std::string goForward();
+	void goForward();
 
 	//returns id of current document
 	std::string getCurrentDocument() const;

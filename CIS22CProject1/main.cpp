@@ -1,145 +1,162 @@
 #include <iostream>
 #include <string>
-#include <stdexcept>
-#include <iomanip> // For std::setw
+#include <sstream>      // For istringstream
+#include <vector>
 
-// We only need the "top-level" class
+// --- Our Project Headers ---
 #include "SearchEngine.h"
+#include "LinkedList.h" // For printing query results
 
-// Helper function to print a welcome message
-void printWelcomeMessage() {
-    std::cout << "=========================================" << std::endl;
-    std::cout << "  C++ Simplified Search Engine           " << std::endl;
-    std::cout << "=========================================" << std::endl;
-    std::cout << "  (Data Structures by [Your Name Here])  " << std::endl;
-    std::cout << "\nBuilding index from 'documents/' directory..." << std::endl;
-}
+// --- Helper Function Prototypes ---
+void printWelcome();
+void printHelp();
+void printQueryResults(LinkedList<std::string>& results);
+void handleQuery(SearchEngine& engine, const std::string& query);
+void handleView(SearchEngine& engine, const std::string& docID);
+void handleBack(SearchEngine& engine);
+void handleForward(SearchEngine& engine);
 
-// Helper function to print the list of commands
-void printHelp() {
-    std::cout << "\n--- Commands ---" << std::endl;
-    std::cout << "  query [term(s)]  : Search for documents containing all terms." << std::endl;
-    std::cout << "                     (e.g., query quick fox)" << std::endl;
-    std::cout << "  view [docID]     : View a document to add to history." << std::endl;
-    std::cout << "                     (e.g., view doc1.txt)" << std::endl;
-    std::cout << "  back             : Go to the previous document." << std::endl;
-    std::cout << "  forward          : Go to the next document." << std::endl;
-    std::cout << "  current          : Show the currently viewed document." << std::endl;
-    std::cout << "  help             : Show this help message." << std::endl;
-    std::cout << "  quit             : Exit the program." << std::endl;
-    std::cout << "------------------" << std::endl;
-}
-
-// Helper function to print query results
-void printResults(const LinkedList<std::string>& results, const std::string& query) {
-    if (results.isEmpty()) {
-        std::cout << "  No documents found containing all terms: \"" << query << "\"" << std::endl;
-    }
-    else {
-        std::cout << "  Documents found for \"" << query << "\":" << std::endl;
-        // This is a small hack since our list doesn't have an iterator.
-        // We will make a copy and then print by destructively
-        // removing from the copy.
-        LinkedList<std::string> copy = results;
-        while (!copy.isEmpty()) {
-            std::cout << "    - " << copy.removeFromHead() << std::endl;
-        }
-    }
-}
-
-/**
- * Main application entry point.
- * This runs the interactive Command-Line Interface (CLI).
- */
+// --- Main Function ---
 int main() {
-    SearchEngine engine;
-
-    printWelcomeMessage();
 
     try {
-        // --- 1. Build the Index ---
-        // This is the main setup step
-        engine.buildIndexFromDirectory("documents");
-    }
-    catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "\n!!! CRITICAL ERROR: Cannot access 'documents' directory. !!!" << std::endl;
-        std::cerr << "!!! Please create a folder named 'documents' in the     !!!" << std::endl;
-        std::cerr << "!!! same directory as the .exe and add your .txt files. !!!" << std::endl;
-        std::cerr << "!!! Error details: " << e.what() << std::endl;
-        std::cout << "\nPress Enter to exit...";
-        std::cin.get();
-        return 1; // Exit with error
+        std::cout << "DEBUG: Current Working Directory is: "
+            << std::filesystem::current_path() << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "An unexpected error occurred during indexing: " << e.what() << std::endl;
-        return 1;
+        std::cout << "DEBUG: Error getting current path: " << e.what() << std::endl;
     }
 
-    printHelp();
+    // Pass the documents directory to the engine's constructor
+    // --- UPDATED to use new constructor ---
+    SearchEngine engine("documents");
 
-    // --- 2. Run the Interactive Query Loop ---
+    // Build the index from all .txt files in that directory
+    // --- UPDATED to call the function with no parameters ---
+    engine.buildIndexFromDirectory();
+
+    printWelcome();
+
     std::string line;
     while (true) {
         std::cout << "\n> ";
-        if (!std::getline(std::cin, line) || line == "quit") {
-            break; // Exit on "quit" or end-of-file (Ctrl+D/Ctrl+Z)
+        if (!std::getline(std::cin, line)) {
+            break; // End of input
         }
 
         if (line.empty()) {
             continue;
         }
 
-        // Use a stringstream to parse the command and its arguments
-        std::stringstream ss(line);
+        // Use istringstream to split the command and its arguments
+        std::istringstream iss(line);
         std::string command;
-        ss >> command; // Get the first "word", which is the command
+        iss >> command; // Read the first word
 
-        try {
-            if (command == "query") {
-                std::string queryString;
-                // Get the rest of the line as the query
-                std::getline(ss, queryString);
-
-                // Remove leading whitespace from query
-                size_t first = queryString.find_first_not_of(" \t");
-                if (first == std::string::npos) {
-                    std::cout << "  Usage: query [term(s)]" << std::endl;
-                    continue;
-                }
-                queryString = queryString.substr(first);
-
-                LinkedList<std::string> results = engine.query(queryString);
-                printResults(results, queryString);
-            }
-            else if (command == "view") {
-                std::string docID;
-                if (!(ss >> docID)) {
-                    std::cout << "  Usage: view [docID]" << std::endl;
-                    continue;
-                }
-                engine.viewDocument(docID);
-            }
-            else if (command == "back") {
-                engine.goBack();
-            }
-            else if (command == "forward") {
-                engine.goForward();
-            }
-            else if (command == "current") {
-                std::cout << "  Current doc: " << engine.getCurrentDocument() << std::endl;
-            }
-            else if (command == "help") {
-                printHelp();
-            }
-            else {
-                std::cout << "  Unknown command: \"" << command << "\". Type 'help' for commands." << std::endl;
-            }
+        if (command == "quit" || command == "exit") {
+            std::cout << "Goodbye!" << std::endl;
+            break;
         }
-        catch (const std::exception& e) {
-            std::cerr << "  An error occurred: " << e.what() << std::endl;
+        else if (command == "query" || command == "q") {
+            std::string restOfLine;
+            std::getline(iss, restOfLine); // Read the rest of the line
+            handleQuery(engine, restOfLine);
+        }
+        else if (command == "view" || command == "v") {
+            std::string docID;
+            iss >> docID;
+            handleView(engine, docID);
+        }
+        else if (command == "back" || command == "b") {
+            handleBack(engine);
+        }
+        else if (command == "forward" || command == "f") {
+            handleForward(engine);
+        }
+        else if (command == "help") {
+            printHelp();
+        }
+        else {
+            std::cout << "Unknown command. Type 'help' for a list of commands." << std::endl;
         }
     }
 
-    std::cout << "\nGoodbye!" << std::endl;
-    return 0; // Success
+    return 0;
+}
+
+// --- Helper Function Implementations ---
+
+void printWelcome() {
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "  Welcome to the C++ Search Engine!" << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "Type 'help' for commands, 'quit' to exit." << std::endl;
+}
+
+void printHelp() {
+    std::cout << "Available commands:" << std::endl;
+    std::cout << "  query <term> [term2]..." << " : Search for docs with all terms." << std::endl;
+    std::cout << "  view <docID>" << "             : View a document by its ID (e.g., doc1.txt)." << std::endl;
+    std::cout << "  back" << "                     : Go to the previous document." << std::endl;
+    std::cout << "  forward" << "                  : Go to the next document." << std::endl;
+    std::cout << "  help" << "                     : Show this help message." << std::endl;
+    std::cout << "  quit" << "                     : Exit the program." << std::endl;
+}
+
+/**
+ * Prints the results from a query.
+ */
+void printQueryResults(LinkedList<std::string>& results) {
+    if (results.isEmpty()) {
+        std::cout << "  No documents found." << std::endl;
+        return;
+    }
+    std::cout << "  Documents found: ";
+
+    // We must copy the list to print it
+    LinkedList<std::string> temp = results;
+    temp.print();
+}
+
+/**
+ * Handles the 'query' command.
+ */
+void handleQuery(SearchEngine& engine, const std::string& queryString) {
+    if (queryString.empty() || queryString.find_first_not_of(' ') == std::string::npos) {
+        std::cout << "  Usage: query <term1> [term2]..." << std::endl;
+        return;
+    }
+    LinkedList<std::string> results = engine.query(queryString);
+    printQueryResults(results);
+}
+
+/**
+ * Handles the 'view' command.
+ * Engine now handles all printing.
+ */
+void handleView(SearchEngine& engine, const std::string& docID) {
+    if (docID.empty()) {
+        std::cout << "  Usage: view <docID> (e.g., view doc1.txt)" << std::endl;
+        return;
+    }
+    // --- UPDATED: No more cout here ---
+    engine.viewDocument(docID);
+}
+
+/**
+ * Handles the 'back' command.
+ * Engine now handles all printing.
+ */
+void handleBack(SearchEngine& engine) {
+    // --- UPDATED: No more cout here ---
+    engine.goBack();
+}
+
+/**
+ * Handles the 'forward' command.
+ * Engine now handles all printing.
+ */
+void handleForward(SearchEngine& engine) {
+    // --- UPDATED: No more cout here ---
+    engine.goForward();
 }
