@@ -78,6 +78,11 @@ public:
 
 	//Copy Constructor
 	LinkedList(const LinkedList<T>& other) {
+		//make sure everything is safe before copying
+		head = nullptr;
+		count = 0;
+
+		//copy
 		*this = other;
 	}
 
