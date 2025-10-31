@@ -23,23 +23,22 @@ private:
 public:
 
 	//nested iterator support for linked list class
-
 	class Iterator {
 	private:
 		Node* current;
 
 	public:
-		// Constructor: Initialize the iterator with a node
+		//constructor: Initialize the iterator with a node
 		Iterator(Node* node) : current(node) {}
 
-		// 1. Dereference operator (*)
+		// 1. dereference operator (*)
 		// Returns the data at the current node
 		T& operator*() {
 			return current->data;
 		}
 
-		// 2. Pre-increment operator (++)
-		// Moves the iterator to the next node and returns it
+		// 2. pre-increment operator (++)
+		//moves the iterator to the next node and returns it
 		Iterator& operator++() {
 			if (current != nullptr) {
 				current = current->next;
@@ -47,24 +46,24 @@ public:
 			return *this;
 		}
 
-		// 3. Not-equals operator (!=)
-		// Checks if two iterators are pointing at different nodes
+		// 3. not-equals operator (!=)
+		//checks if two iterators are pointing at different nodes
 		bool operator!=(const Iterator& other) const {
 			return current != other.current;
 		}
 	};
 
-	// Returns an iterator pointing to the beginning of the list
+	//returns an iterator pointing to the beginning of the list
 	Iterator begin() {
 		return Iterator(head);
 	}
 
-	// Returns an iterator pointing to the end of the list (nullptr)
+	//returns an iterator pointing to the end of the list (nullptr)
 	Iterator end() {
 		return Iterator(nullptr);
 	}
-	//end of iterator support
 
+	//now actual linked list stuff
 	//linked list constructor
 	LinkedList() {
 		head = nullptr;
@@ -76,7 +75,7 @@ public:
 		clear();
 	}
 
-	//Copy Constructor
+	//copy constructor
 	LinkedList(const LinkedList<T>& other) {
 		//make sure everything is safe before copying
 		head = nullptr;
@@ -86,28 +85,28 @@ public:
 		*this = other;
 	}
 
-	//Copy assignment operator
+	//copy assignment operator
 	LinkedList<T>& operator=(const LinkedList<T>& other) {
 		//1. checking for self assignment
 		if (this == &other) {
 			return *this;
 		}
 
-		//2. Clear this list current contents
+		//2. clear this list current contents
 		clear();
 
-		//3. Copy elements from other list
+		//3. copy elements from other list
 		if (other.head == nullptr) {
 			return *this; //other list is empty
 		}
 
-		//Copying first node
+		//copying first node
 		head = new Node(other.head->data);
 		Node* thisCurrent = head;
 		Node* otherCurrent = other.head->next;
 		count = 1;
 
-		//Copy the rest of the nodes
+		//copy the rest of the nodes
 		while (otherCurrent != nullptr) {
 			thisCurrent->next = new Node(otherCurrent->data);
 			thisCurrent = thisCurrent->next;
@@ -125,16 +124,16 @@ public:
 	void insert(const T& data) {
 		Node* newNode = new Node(data);
 		if (head == nullptr) {
-			// List is empty
+			//list is empty
 			head = newNode;
 		}
 		else {
-			// Traverse to the end
+			//traverse to the end
 			Node* current = head;
 			while (current->next != nullptr) {
 				current = current->next;
 			}
-			// current is now the last node
+			//current is now the last node
 			current->next = newNode;
 		}
 		count++;
@@ -147,7 +146,7 @@ public:
 			return false; // List is empty
 		}
 
-		// Case 1: Delete the head
+		//case 1: Delete the head
 		if (head->data == data) {
 			Node* temp = head;
 			head = head->next;
@@ -156,13 +155,13 @@ public:
 			return true;
 		}
 
-		// Case 2: Delete from middle or tail
+		//case 2: Delete from middle or tail
 		Node* current = head;
 		while (current->next != nullptr && current->next->data != data) {
 			current = current->next;
 		}
 
-		// If we found the node (current->next is the one to delete)
+		//uf we found the node (current->next is the one to delete)
 		if (current->next != nullptr) {
 			Node* temp = current->next;
 			current->next = current->next->next;
@@ -171,11 +170,11 @@ public:
 			return true;
 		}
 
-		return false; // Not found
+		return false; //not found
 	}
 
-	// Finds the first node with 'data'
-	// Returns true if found, false otherwise
+	//finds the first node with 'data'
+	//returns true if found, false otherwise
 	bool find(const T& data) const {
 		Node* current = head;
 		while (current != nullptr) {
@@ -187,17 +186,17 @@ public:
 		return false;
 	}
 
-	// Returns the number of items
+	//returns the number of items
 	int size() const {
 		return count;
 	}
 
-	// Checks if the list is empty
+	//checks if the list is empty
 	bool isEmpty() const {
 		return head == nullptr;
 	}
 
-	// Helper to completely clear the list (used by destructor and assignment)
+	//helper to completely clear the list (used by destructor and assignment)
 	void clear() {
 		Node* current = head;
 		while (current != nullptr) {
@@ -209,8 +208,8 @@ public:
 		count = 0;
 	}
 
-	//Functions for future implementation in Queue
-	// Removes and returns the data from the head
+	//functions for future implementation in Queue
+	//removes and returns the data from the head
 	T removeFromHead() {
 		if (isEmpty()) {
 			throw std::out_of_range("Cannot remove from empty list");
@@ -225,7 +224,7 @@ public:
 		return data;
 	}
 
-	// Gets data from the head without removing it
+	//gets data from the head without removing it
 	T& getFromHead() const {
 		if (isEmpty()) {
 			throw std::out_of_range("Cannot get from empty list");
@@ -233,9 +232,7 @@ public:
 		return head->data;
 	}
 
-	// --- Debugging ---
-
-	// Prints the list contents (for testing)
+	//prints the list contents for testing
 	void print() const {
 		Node* current = head;
 		std::cout << "List (" << size() << " items): [";

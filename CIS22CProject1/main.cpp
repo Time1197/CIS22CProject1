@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
-#include <sstream>      // For istringstream
+#include <sstream>
 #include <vector>
 
-// --- Our Project Headers ---
+// --- Project Headers ---
 #include "SearchEngine.h"
-#include "LinkedList.h" // For printing query results
+#include "LinkedList.h" //query results
 
 // --- Helper Function Prototypes ---
 void printWelcome();
@@ -27,12 +27,10 @@ int main() {
         std::cout << "DEBUG: Error getting current path: " << e.what() << std::endl;
     }
 
-    // Pass the documents directory to the engine's constructor
-    // --- UPDATED to use new constructor ---
+    //pass the documents directory to the engine's constructor
     SearchEngine engine("documents");
 
-    // Build the index from all .txt files in that directory
-    // --- UPDATED to call the function with no parameters ---
+    //build index from all .txt files in that directory
     engine.buildIndexFromDirectory();
 
     printWelcome();
@@ -41,17 +39,17 @@ int main() {
     while (true) {
         std::cout << "\n> ";
         if (!std::getline(std::cin, line)) {
-            break; // End of input
+            break; //end of input
         }
 
         if (line.empty()) {
             continue;
         }
 
-        // Use istringstream to split the command and its arguments
+        //use istringstream to split command and its arguments
         std::istringstream iss(line);
         std::string command;
-        iss >> command; // Read the first word
+        iss >> command; //read the first word
 
         if (command == "quit" || command == "exit") {
             std::cout << "Goodbye!" << std::endl;
@@ -59,7 +57,7 @@ int main() {
         }
         else if (command == "query" || command == "q") {
             std::string restOfLine;
-            std::getline(iss, restOfLine); // Read the rest of the line
+            std::getline(iss, restOfLine); //read the rest of the line
             handleQuery(engine, restOfLine);
         }
         else if (command == "view" || command == "v") {
@@ -103,9 +101,7 @@ void printHelp() {
     std::cout << "  quit" << "                     : Exit the program." << std::endl;
 }
 
-/**
- * Prints the results from a query.
- */
+//prints resuts of query
 void printQueryResults(LinkedList<std::string>& results) {
     if (results.isEmpty()) {
         std::cout << "  No documents found." << std::endl;
@@ -118,9 +114,7 @@ void printQueryResults(LinkedList<std::string>& results) {
     temp.print();
 }
 
-/**
- * Handles the 'query' command.
- */
+//handles query command
 void handleQuery(SearchEngine& engine, const std::string& queryString) {
     if (queryString.empty() || queryString.find_first_not_of(' ') == std::string::npos) {
         std::cout << "  Usage: query <term1> [term2]..." << std::endl;
@@ -130,33 +124,22 @@ void handleQuery(SearchEngine& engine, const std::string& queryString) {
     printQueryResults(results);
 }
 
-/**
- * Handles the 'view' command.
- * Engine now handles all printing.
- */
+//handles view command
 void handleView(SearchEngine& engine, const std::string& docID) {
     if (docID.empty()) {
         std::cout << "  Usage: view <docID> (e.g., view doc1.txt)" << std::endl;
         return;
     }
-    // --- UPDATED: No more cout here ---
     engine.viewDocument(docID);
 }
 
-/**
- * Handles the 'back' command.
- * Engine now handles all printing.
- */
+//back command
 void handleBack(SearchEngine& engine) {
     // --- UPDATED: No more cout here ---
     engine.goBack();
 }
 
-/**
- * Handles the 'forward' command.
- * Engine now handles all printing.
- */
+//forwards command
 void handleForward(SearchEngine& engine) {
-    // --- UPDATED: No more cout here ---
     engine.goForward();
 }

@@ -2,12 +2,12 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <string> // For print() debugging
+#include <string> // for print() debugging
 
 template <typename K, typename V>
 class RBMap {
 private:
-    // --- 1. Private Enums and Structs ---
+    // private enums and stacks
     enum Color { RED, BLACK };
 
     struct Node {
@@ -21,20 +21,18 @@ private:
         Node(const K& k, const V& v) : key(k), value(v), left(nullptr), right(nullptr), parent(nullptr), color(RED) {}
     };
 
-    // --- 2. Private Member Variables ---
+    // private member variables
     Node* root;
-    Node* NIL; // A single "sentinel" node to represent all leaves
+    Node* NIL; //single "sentinel" node to represent all leaves
     int count;
 
 public:
-    // --- 3. Public Constructor, Destructor, "Rule of 3" ---
+    // public constructor, destructor
 
-    /**
-     * Constructor
-     */
+    //constructor
     RBMap() {
-        // Create the sentinel node
-        NIL = new Node(K(), V()); // Use default constructor for K and V
+        //create sentinel node
+        NIL = new Node(K(), V()); //use default constructor for K and V
         NIL->color = BLACK;
         NIL->left = NIL;
         NIL->right = NIL;
@@ -43,59 +41,54 @@ public:
         count = 0;
     }
 
-    /**
-     * Destructor
-     */
+
+     //destructor
     ~RBMap() {
-        clearRecursive(root); // Calls private helper
-        delete NIL; // Don't forget to delete the sentinel
+        clearRecursive(root); //private helper call
+        delete NIL; //delete the sentinel
     }
 
-    /**
-     * Copy Constructor
-     */
+    //copy constructor
     RBMap(const RBMap<K, V>& other) {
-        // 1. Set up this map's new NIL node
+        // 1.set new NIL node
         NIL = new Node(K(), V());
         NIL->color = BLACK;
         NIL->left = NIL;
         NIL->right = NIL;
         NIL->parent = NIL;
 
-        // 2. Call the recursive copy function (private helper)
-        root = copyRecursive(other.root, NIL, other.NIL); // Pass our NIL as parent of root
+        // 2. call recursive copy function (private helper)
+        root = copyRecursive(other.root, NIL, other.NIL); //pass NIL parent of root
 
-        // 3. Copy the size
+        // 3. copy size
         count = other.count;
     }
 
-    /**
-     * Copy Assignment Operator
-     */
+    
+    //copy assignment operator
     RBMap<K, V>& operator=(const RBMap<K, V>& other) {
         if (this == &other) {
-            return *this; // Handle self-assignment
+            return *this; //handle self-assignment
         }
 
-        // 1. Clear this map's old data
+        // 1. clear this map's old data
         clearRecursive(root);
-        // Note: We keep our existing NIL node
+        //keep our existing NIL node
 
-        // 2. Call the recursive copy function (private helper)
-        root = copyRecursive(other.root, NIL, other.NIL); // Pass our NIL as parent of root
+        // 2. call recursive copy function (private helper)
+        root = copyRecursive(other.root, NIL, other.NIL); // Pass NIL as parent of root
 
-        // 3. Copy the size
+        // 3. copy size
         count = other.count;
 
         return *this;
     }
 
 
-    // --- 4. Public Interface ---
+    //public interface
 
-    /**
-     * Inserts a key-value pair. Fixes the tree if properties are violated.
-     */
+
+     //inserts a key-value pair. Fixes tree if not balanced
     void insert(const K& key, const V& value) {
         Node* z = new Node(key, value);
         z->left = NIL;
@@ -105,7 +98,7 @@ public:
         Node* y = NIL;
         Node* x = this->root;
 
-        // Standard BST insert
+        //standard BST insert
         while (x != NIL) {
             y = x;
             if (z->key < x->key) {
@@ -115,18 +108,18 @@ public:
                 x = x->right;
             }
             else {
-                // z->key == x->key
-                // Key already exists, update value and clean up
+                //z->key == x->key
+                //key already exists, update value and clean up
                 x->value = value;
-                delete z; // Don't need the new node
-                return; // Exit function, no rebalance needed
+                delete z; //don't need the new node
+                return; //exit function, no rebalance needed
             }
         }
 
-        // Link new node z into the tree
+        //link new node z into tree
         z->parent = y;
         if (y == NIL) {
-            this->root = z; // Tree was empty
+            this->root = z; //tree was empty
         }
         else if (z->key < y->key) {
             y->left = z;
@@ -135,13 +128,12 @@ public:
             y->right = z;
         }
 
-        count++; // Increment count
-        fixInsert(z); // Calls private helper
+        count++; //increment count
+        fixInsert(z); //calls private helper
     }
 
-    /**
-     * Searches for a key and returns its value via out-parameter.
-     */
+    
+    //searches for a key and returns its value via out-parameter.
     bool search(const K& key, V& outValue) const {
         Node* node = root;
         while (node != NIL) {
@@ -159,41 +151,33 @@ public:
         return false;
     }
 
-    /**
-     * Returns the number of items in the map.
-     */
+    //returns the number of items in the map.
     int size() const {
         return count;
     }
 
-    /**
-     * Checks if the map is empty.
-     */
+    //checks if map is empty.
     bool isEmpty() const {
         return root == NIL;
     }
 
-    /**
-     * Prints the tree contents for debugging.
-     */
+     //prints tree contents for debugging.
     void print() const {
         std::cout << "RBMap (" << size() << " items):\n";
         if (isEmpty()) {
             std::cout << " (empty)\n";
         }
         else {
-            printInOrder(root); // Calls private helper
+            printInOrder(root); //calls private helper
         }
     }
 
 private:
-    // --- 5. Private Helper Functions ---
-    // (All definitions are placed *after* the public functions
-    // that call them, so no forward declarations are needed.)
+    //private helper functions
+    //(all definitions are placed *after* the public functions
+    //that call them, so no forward declarations are needed.)
 
-    /**
-     * Performs a left rotation on node x.
-     */
+    //performs a left rotation on node x.
     void leftRotate(Node* x) {
         Node* y = x->right;
         x->right = y->left;
@@ -214,9 +198,8 @@ private:
         x->parent = y;
     }
 
-    /**
-     * Performs a right rotation on node y.
-     */
+
+    //performs a right rotation on node y.
     void rightRotate(Node* y) {
         Node* x = y->left;
         y->left = x->right;
@@ -237,15 +220,13 @@ private:
         y->parent = x;
     }
 
-    /**
-     * Restores Red-Black properties after insertion.
-     */
+    //restores Red-Black properties after insertion.
     void fixInsert(Node* z) {
         while (z->parent->color == RED) {
             if (z->parent == z->parent->parent->left) {
-                Node* y = z->parent->parent->right; // Uncle
+                Node* y = z->parent->parent->right; //uncle
                 if (y->color == RED) {
-                    // Case 1: Uncle is RED
+                    //case 1: uncle is RED
                     z->parent->color = BLACK;
                     y->color = BLACK;
                     z->parent->parent->color = RED;
@@ -253,21 +234,21 @@ private:
                 }
                 else {
                     if (z == z->parent->right) {
-                        // Case 2: Uncle is BLACK, z is right child (Left-Right)
+                        //case 2: uncle is BLACK, z is right child (Left-Right)
                         z = z->parent;
                         leftRotate(z);
                     }
-                    // Case 3: Uncle is BLACK, z is left child (Left-Left)
+                    //case 3: uncle is BLACK, z is left child (Left-Left)
                     z->parent->color = BLACK;
                     z->parent->parent->color = RED;
                     rightRotate(z->parent->parent);
                 }
             }
             else {
-                // Symmetric to above, with "right" and "left" exchanged
-                Node* y = z->parent->parent->left; // Uncle
+                //symmetric to above, with "right" and "left" exchanged
+                Node* y = z->parent->parent->left; //uncle
                 if (y->color == RED) {
-                    // Case 4: Uncle is RED
+                    //case 4: uncle is RED
                     z->parent->color = BLACK;
                     y->color = BLACK;
                     z->parent->parent->color = RED;
@@ -275,11 +256,11 @@ private:
                 }
                 else {
                     if (z == z->parent->left) {
-                        // Case 5: Uncle is BLACK, z is left child (Right-Left)
+                        //case 5: uncle is BLACK, z is left child (Right-Left)
                         z = z->parent;
                         rightRotate(z);
                     }
-                    // Case 6: Uncle is BLACK, z is right child (Right-Right)
+                    //case 6: uncle is BLACK, z is right child (Right-Right)
                     z->parent->color = BLACK;
                     z->parent->parent->color = RED;
                     leftRotate(z->parent->parent);
@@ -289,9 +270,8 @@ private:
         root->color = BLACK;
     }
 
-    /**
-     * Recursively deletes all nodes in a post-order traversal.
-     */
+    
+    //recursively deletes all nodes in a post-order traversal.
     void clearRecursive(Node* node) {
         if (node != NIL) {
             clearRecursive(node->left);
@@ -300,35 +280,31 @@ private:
         }
     }
 
-    /**
-     * Recursively copies the tree.
-     */
+    //recursively copies tree.
     Node* copyRecursive(Node* nodeToCopy, Node* newParent, Node* otherNIL) {
         if (nodeToCopy == otherNIL) {
-            return NIL; // Base case: hit a leaf
+            return NIL; //base case: hit a leaf
         }
 
-        // 1. Create the new node and copy data
+        //1. create new node and copy data
         Node* newNode = new Node(nodeToCopy->key, nodeToCopy->value);
         newNode->color = nodeToCopy->color;
-        newNode->parent = newParent; // Link to new parent
+        newNode->parent = newParent; //link to new parent
 
-        // 2. Recursively copy children, passing *this new node* as their parent
+        //2. recursively copy children, passing *this new node* as their parent
         newNode->left = copyRecursive(nodeToCopy->left, newNode, otherNIL);
         newNode->right = copyRecursive(nodeToCopy->right, newNode, otherNIL);
 
         return newNode;
     }
 
-    /**
-     * Recursively prints the tree in-order for debugging.
-     */
+    //recursively prints the tree in-order for debugging
     void printInOrder(Node* node) const {
         if (node == NIL) return;
         printInOrder(node->left);
         std::cout << " (" << node->key << ": " << node->value
             << ", c=" << (node->color == RED ? "R" : "B")
-            // Use key (a std::string) directly, not to_string()
+            //use key (a string) directly, not to_string()
             << ", p=" << (node->parent == NIL ? "NIL" : node->parent->key)
             << ")\n";
         printInOrder(node->right);

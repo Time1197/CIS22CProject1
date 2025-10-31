@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <algorithm> // For std::max
+#include <algorithm> //for max
 
 template <typename K, typename V>
 class AVLMap {
@@ -12,25 +12,23 @@ private:
         V value;
         Node* left;
         Node* right;
-        int height; // <-- ADDED: Height of this node
+        int height;
 
         Node(const K& k, const V& v) {
             key = k;
             value = v;
             left = nullptr;
             right = nullptr;
-            height = 1; // New node is initially at height 1
+            height = 1; //new node is initially at height 1
         }
     };
 
     Node* root;
     int count;
 
-    // --- AVL-specific Helper Functions ---
+    //AVL helper funcitons
 
-    /**
-     * Gets the height of a node (handles nullptr).
-     */
+    //gets height of a node (handles nullptr).
     int getHeight(Node* node) {
         if (node == nullptr) {
             return 0;
@@ -38,18 +36,16 @@ private:
         return node->height;
     }
 
-    /**
-     * Updates the height of a node based on its children's heights.
-     */
+    
+    //updates height of a node based on children's heights.
     void updateHeight(Node* node) {
         if (node != nullptr) {
             node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
         }
     }
 
-    /**
-     * Gets the balance factor of a node (left height - right height).
-     */
+    
+     //gets the balance factor of a node (left height - right height).
     int getBalance(Node* node) {
         if (node == nullptr) {
             return 0;
@@ -57,63 +53,48 @@ private:
         return getHeight(node->left) - getHeight(node->right);
     }
 
-    /**
-     * Performs a right rotation on the subtree rooted with y.
-     * y                           x
-     * / \                         / \
-     * x   T3  (Right Rotate) -->  T1  y
-     * / \                             / \
-     * T1  T2                          T2  T3
-     */
+    //performs a right rotation on the subtree rooted with y.
     Node* rightRotate(Node* y) {
         Node* x = y->left;
         Node* T2 = x->right;
 
-        // Perform rotation
+        //perform rotation
         x->right = y;
         y->left = T2;
 
-        // Update heights (order matters: update children first)
+        //update heights (order matters: update children first)
         updateHeight(y);
         updateHeight(x);
 
-        // Return new root
+        //return new root
         return x;
     }
 
-    /**
-     * Performs a left rotation on the subtree rooted with x.
-     * x                              y
-     * / \                            / \
-     * T1  y   (Left Rotate) -->      x   T3
-     * / \                        / \
-     * T2  T3                     T1  T2
-     */
+    //performs a left rotation on the subtree rooted with x.
     Node* leftRotate(Node* x) {
         Node* y = x->right;
         Node* T2 = y->left;
 
-        // Perform rotation
+        //perform rotation
         y->left = x;
         x->right = T2;
 
-        // Update heights (order matters: update children first)
+        //update heights (order matters: update children first)
         updateHeight(x);
         updateHeight(y);
 
-        // Return new root
+        //return new root
         return y;
     }
 
 
-    // --- Core Recursive Functions (Modified from BST) ---
+    //core recursive functions (modified from BST)
 
-    /**
-     * Recursively inserts a key-value pair and rebalances the tree.
-     * Returns the new root of the (sub)tree.
-     */
+    
+    //recursively inserts a key-value pair and rebalances the tree.
+    //returns the new root of the (sub)tree.
     Node* insertRecursive(Node* node, const K& key, const V& value) {
-        // 1. Standard BST Insert
+        // 1. standard BST insert
         if (node == nullptr) {
             count++;
             return new Node(key, value);
@@ -126,56 +107,55 @@ private:
             node->right = insertRecursive(node->right, key, value);
         }
         else {
-            // Key already exists, update value and return
+            //key already exists, update value and return
             node->value = value;
             return node;
         }
 
-        // 2. Update height of this ancestor node
+        // 2. update height of this ancestor node
         updateHeight(node);
 
-        // 3. Get the balance factor to check if this node became unbalanced
+        // 3. get the balance factor to check if this node became unbalanced
         int balance = getBalance(node);
 
-        // 4. If unbalanced, perform rotations (4 cases)
+        // 4. if unbalanced, perform rotations (4 cases)
 
-        // Case 1: Left Left (LL)
-        // Imbalance is on the left (balance > 1), and new key was
-        // inserted into the left child's left subtree.
+        //case 1: left left
+        //imbalance is on the left (balance > 1), and new key was
+        //inserted into the left child's left subtree.
         if (balance > 1 && key < node->left->key) {
             return rightRotate(node);
         }
 
-        // Case 2: Right Right (RR)
-        // Imbalance is on the right (balance < -1), and new key was
-        // inserted into the right child's right subtree.
+        //case 2: right right
+        //imbalance is on the right (balance < -1), and new key was
+        //inserted into the right child's right subtree.
         if (balance < -1 && key > node->right->key) {
             return leftRotate(node);
         }
 
-        // Case 3: Left Right (LR)
-        // Imbalance is on the left (balance > 1), but new key was
-        // inserted into the left child's right subtree.
+        //case 3: left right
+        //imbalance is on the left (balance > 1), but new key was
+        //inserted into the left child's right subtree.
         if (balance > 1 && key > node->left->key) {
-            node->left = leftRotate(node->left); // First, rotate left on child
-            return rightRotate(node);            // Then, rotate right on parent
+            node->left = leftRotate(node->left); //first, rotate left on child
+            return rightRotate(node);            //then, rotate right on parent
         }
 
-        // Case 4: Right Left (RL)
-        // Imbalance is on the right (balance < -1), but new key was
-        // inserted into the right child's left subtree.
+        //case 4: right left
+        //imbalance is on the right (balance < -1), but new key was
+        //inserted into the right child's left subtree.
         if (balance < -1 && key < node->right->key) {
             node->right = rightRotate(node->right); // First, rotate right on child
             return leftRotate(node);             // Then, rotate left on parent
         }
 
-        // Return the (possibly new) root of the subtree
+        //return the (possibly new) root of the subtree
         return node;
     }
 
-    /**
-     * Recursively searches for a key (identical to BSTMap).
-     */
+    
+    //recursively searches for a key (identical to BSTMap).
     bool searchRecursive(Node* node, const K& key, V& outValue) const {
         if (node == nullptr) {
             return false;
@@ -192,9 +172,8 @@ private:
         }
     }
 
-    /**
-     * Recursively deletes all nodes (identical to BSTMap).
-     */
+    
+     //recursively deletes all nodes (identical to BSTMap).
     void clear(Node* node) {
         if (node != nullptr) {
             clear(node->left);
@@ -203,25 +182,21 @@ private:
         }
     }
 
-    /**
-     * Recursively copies the tree (identical to BSTMap, except for height).
-     */
+     //recursively copies the tree (identical to BSTMap, except for height).
     Node* copyRecursive(Node* node) {
         if (node == nullptr) {
             return nullptr;
         }
-        // Copy this node
+        //copy this node
         Node* newNode = new Node(node->key, node->value);
-        newNode->height = node->height; // Copy height
-        // Copy subtrees
+        newNode->height = node->height; //copy height
+        //copy subtrees
         newNode->left = copyRecursive(node->left);
         newNode->right = copyRecursive(node->right);
         return newNode;
     }
 
-    /**
-     * Recursively prints the tree in-order (identical to BSTMap).
-     */
+    //recursively prints the tree in-order (identical to BSTMap).
     void printInOrder(Node* node) const {
         if (node == nullptr) return;
         printInOrder(node->left);
@@ -230,25 +205,25 @@ private:
     }
 
 public:
-    // --- Constructor ---
+    //constructor
     AVLMap() {
         root = nullptr;
         count = 0;
     }
 
-    // --- Destructor ---
+    //destructor
     ~AVLMap() {
         clear(root);
     }
 
-    // --- Copy Constructor ---
+    //copy constrcutor
     AVLMap(const AVLMap<K, V>& other) {
         root = nullptr;
         count = other.count;
         root = copyRecursive(other.root);
     }
 
-    // --- Copy Assignment Operator ---
+    //copy assignment operator
     AVLMap<K, V>& operator=(const AVLMap<K, V>& other) {
         if (this == &other) {
             return *this;
@@ -259,7 +234,7 @@ public:
         return *this;
     }
 
-    // --- Public Interface ---
+    //public interface
 
     void insert(const K& key, const V& value) {
         root = insertRecursive(root, key, value);
@@ -277,7 +252,7 @@ public:
         return root == nullptr;
     }
 
-    // --- Debugging ---
+    //print (for testing)
     void print() const {
         std::cout << "AVLMap (" << size() << " items):\n";
         if (isEmpty()) {
