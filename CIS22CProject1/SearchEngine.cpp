@@ -106,43 +106,16 @@ LinkedList<std::string> SearchEngine::query(const std::string& queryString) {
 		return matchingDocs; //return empty list for empty query
 	}
 
-	//2. iterate thru every indexed document
-	//I guess this is a temporary solution for now
-	LinkedList<std::string> docsToSearch = indexedDocuments;
-	if (docsToSearch.isEmpty()) {
-		// HACK: If index hasn't been built, use test docs
-		docsToSearch.insert("doc1.txt");
-		docsToSearch.insert("doc2.txt");
-		docsToSearch.insert("doc3.txt");
-		docsToSearch.insert("doc4.txt");
-	}
-
-	// Since we don't have an iterator, we'll use a while loop and removeFromHead
-	// This is destructive, so let's use the 'indexedDocuments' member
-	while (!indexedDocuments.isEmpty()) {
-		std::string docID = indexedDocuments.removeFromHead();
+	// 2. Iterate through every indexed document (NON-DESTRUCTIVELY!)
+	//    This is now possible because of our iterator.
+	for (const std::string& docID : indexedDocuments) {
 
 		bool allTermsFound = true;
 
 		// 3. For each doc, check if it contains *all* query terms
+		//    We can also use an iterator for the queryTerms list!
+		for (const std::string& term : queryTerms) {
 
-		// Another iterator-less loop. This is getting tricky.
-		// Let's create a temporary vector for the query terms to iterate
-		std::vector<std::string> termsVec;
-		LinkedList<std::string> tempQueryTerms = queryTerms; // Copy
-		while (!tempQueryTerms.isEmpty()) {
-			termsVec.push_back(tempQueryTerms.removeFromHead());
-		}
-
-		// Create a vector of all document IDs
-		LinkedList<std::string> docCopy = indexedDocuments; // Copy
-		std::vector<std::string> docVec;
-		while (!docCopy.isEmpty()) {
-			docVec.push_back(docCopy.removeFromHead());
-		}
-
-
-		for (const std::string& term : termsVec) {
 			RBMap<std::string, int> postings;
 			// a) Check if word is in the main index
 			if (!invertedIndex.search(term, postings)) {
@@ -162,10 +135,6 @@ LinkedList<std::string> SearchEngine::query(const std::string& queryString) {
 			matchingDocs.insert(docID);
 		}
 	}
-
-	// HACK: Restore the indexedDocuments list since we destructively emptied it
-	// In a real app, our LinkedList would have an iterator.
-	indexedDocuments = docsToSearch;
 
 	return matchingDocs;
 }

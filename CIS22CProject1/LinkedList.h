@@ -21,6 +21,50 @@ private:
 	int count; //number of items in the list
 
 public:
+
+	//nested iterator support for linked list class
+
+	class Iterator {
+	private:
+		Node* current;
+
+	public:
+		// Constructor: Initialize the iterator with a node
+		Iterator(Node* node) : current(node) {}
+
+		// 1. Dereference operator (*)
+		// Returns the data at the current node
+		T& operator*() {
+			return current->data;
+		}
+
+		// 2. Pre-increment operator (++)
+		// Moves the iterator to the next node and returns it
+		Iterator& operator++() {
+			if (current != nullptr) {
+				current = current->next;
+			}
+			return *this;
+		}
+
+		// 3. Not-equals operator (!=)
+		// Checks if two iterators are pointing at different nodes
+		bool operator!=(const Iterator& other) const {
+			return current != other.current;
+		}
+	};
+
+	// Returns an iterator pointing to the beginning of the list
+	Iterator begin() {
+		return Iterator(head);
+	}
+
+	// Returns an iterator pointing to the end of the list (nullptr)
+	Iterator end() {
+		return Iterator(nullptr);
+	}
+	//end of iterator support
+
 	//linked list constructor
 	LinkedList() {
 		head = nullptr;
