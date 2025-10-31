@@ -7,10 +7,10 @@ This project is a rudimentary search engine that indexes all .txt files in the *
 2. Make sure the language standard is set to C++17, run the program within your IDE (I used Visual Studio 2022)
 3. The program should be able to identify and process all .txt files within the documents folders. If not, it is likely an enviromental error
 4. type 'help' in the terminal to recieve a list of commands. These are the commands:
-  * query <term1> [term2]  -  search for documents containing all items. Order matters.
-    * For example, if you have file.txt have contents: a b c and you search a b, you will get a result. However if you search b a, you will not get a result.
-  * view <docID>  -  View the full contents of a document (e.g. view doc1.txt)
-  * back  -  Go to the previously viewed document
-  * forward  -  Go to the next document in history
-  * help  -  show the options of possible commands
-  * quit  -  exit the program
+   * query <term1> [term2]  -  search for documents containing all items. Order matters.
+     * For example, if you have file.txt have contents: a b c and you search a b, you will get a result. However if you search b a, you will not get a result.
+   * view <docID>  -  View the full contents of a document (e.g. view doc1.txt)
+   * back  -  Go to the previously viewed document
+   * forward  -  Go to the next document in history
+   * help  -  show the options of possible commands
+   * quit  -  exit the program
